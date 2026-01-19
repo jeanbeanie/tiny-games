@@ -1,0 +1,26 @@
+body {
+    background-color: #1e1e1e;
+    color: #e6e6e6;
+    padding: 1.5rem;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+p {
+    margin: 0.5rem 0;
+}
+
+button {
+    background-color: #333333;
+    color: #ffffff;
+    border: 1px solid #444444;
+    padding: 0.4rem 0.6rem;
+    margin-left: 0.4rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+    button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        border-color: #333333;
+    }
