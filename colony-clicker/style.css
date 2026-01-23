@@ -24,3 +24,17 @@ button {
         cursor: not-allowed;
         border-color: #333333;
     }
+
+.back-link {
+    display: inline-block;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: #aaaaaa;
+    text-decoration: none;
+}
+
+    .back-link:hover {
+        color: #ffffff;
+        text-decoration: underline;
+    }
