@@ -13,6 +13,11 @@ let shedStorageIncrease = 50;
 
 // UI Elements
 const colonyStatus = document.getElementById('colony-status');
+const eventBox = document.getElementById('event-box');
+const eventDescription = document.getElementById('event-description');
+const eventChoice1 = document.getElementById('event-choice-1'); // todo better naming
+const eventChoice2 = document.getElementById('event-choice-2');
+
 const foodDisplay = document.getElementById('food-gathered');
 const maxFoodDisplay = document.getElementById('max-food-count');
 const maxWoodDisplay = document.getElementById('max-wood-count');
@@ -26,6 +31,7 @@ const foodGainDisplay = document.getElementById('food-gain-per-tick');
 const foodLossDisplay = document.getElementById('food-loss-per-tick');
 
 const gatherFoodBtn = document.getElementById('gather-food-btn');
+const gatherWoodBtn = document.getElementById('gather-wood-btn');
 const buildFieldBtn = document.getElementById('build-field-btn');
 const buildHouseBtn = document.getElementById('build-house-btn');
 const buildShedBtn = document.getElementById('build-shed-btn');
@@ -58,7 +64,8 @@ let gameState = {
     population: {
         count: 1,
         max: 1,
-    }
+    },
+    eventIsActive: false,
 }
 // Game Tick - Resource Consumption
 
@@ -98,6 +105,9 @@ setInterval(() => {
             gameState.population.count += 1;
         }
     }
+
+    //check for events
+    checkForEvents();
    
     updateUI();
 }, tickInterval);
@@ -181,7 +191,7 @@ function updateUI() {
     }
 
     colonyStatus.textContent = status;
-
+    eventBox.style.display = gameState.eventIsActive ? 'block' : 'none';
     // disable buttons if not enough resources
     buildFieldBtn.disabled = gameState.resources.wood.count < fieldCost;
     buildHouseBtn.disabled = gameState.resources.wood.count < housingCost;
@@ -192,3 +202,59 @@ function updateUI() {
 
 // Initial UI update
 updateUI();
+
+// Events
+function checkForEvents() {
+    for (let event of events) {
+        if (event.trigger()) {
+            triggerEvent(event);
+            console.log('event triggered', event)
+            break; // only one event active at a time
+        }
+    }
+}
+
+function triggerEvent(event) {
+    gameState.eventIsActive = true;
+    eventDescription.textContent = event.text;
+    eventChoice1.textContent = event.choices[0].label;
+    eventChoice1.onclick = () => {
+        event.choices[0].effect();
+        gameState.eventIsActive = false;
+        updateUI();
+    };
+    eventChoice2.textContent = event.choices[1].label;
+    eventChoice2.onclick = () => {
+        event.choices[1].effect();
+        gameState.eventIsActive = false;
+        updateUI();
+    };
+
+}
+
+const events = [
+    {
+        id: "hungry_travelers",
+        trigger() {
+            return gameState.resources.food.count > 20 &&
+                Math.random() < 0.05;
+        },
+        text: "Hungry travelers pass by your colony. They ask you to spare some food. One wants to join your colony.",
+        choices: [
+            {
+                label: "Give them the food and let them join",
+                effect() {
+                    gameState.resources.food.count -= 10;
+                    gameState.population.count += 1;
+                }
+            },
+            {
+                label: "Turn them away",
+                effect() {
+                    // nothing happens
+                    // TODO maybe something bad DOES happen later.
+                }
+            }
+        ]
+    }
+];

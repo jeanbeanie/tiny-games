@@ -38,3 +38,17 @@ button {
         color: #ffffff;
         text-decoration: underline;
     }
+
+#event-box {
+    background-color: #2a2a2a;
+    border: 1px solid #444444;
+    padding: 1rem;
+    margin-top: 1rem;
+    border-radius: 6px;
+}
+  
+    #event-box button {
+        margin-top: 1rem;
+        background-color: #222222;
+        padding: 0.6rem 1rem;
+    }
