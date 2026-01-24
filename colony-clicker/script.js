@@ -15,6 +15,7 @@ let shedStorageIncrease = 50;
 const colonyStatus = document.getElementById('colony-status');
 const foodDisplay = document.getElementById('food-gathered');
 const maxFoodDisplay = document.getElementById('max-food-count');
+const maxWoodDisplay = document.getElementById('max-wood-count');
 const woodDisplay = document.getElementById('wood-gathered');
 const fieldsDisplay = document.getElementById('fields-count');
 const housingDisplay = document.getElementById('housing-count');
@@ -87,8 +88,9 @@ setInterval(() => {
     // colonists consuming food
     gameState.resources.food.count -= foodConsumption;
 
-    // Clamp resources => constrain food btwn 0 to max storage capacity
+    // Clamp resources => constrain to btwn 0 to max storage capacity
     gameState.resources.food.count = clamp(gameState.resources.food.count, 0, gameState.resources.food.max);
+    gameState.resources.wood.count = clamp(gameState.resources.wood.count, 0, gameState.resources.wood.max);
 
     // if food surplus exists, chance to +1 population
     if (gameState.resources.food.count >= foodConsumption && gameState.population.count < gameState.population.max) {
@@ -133,8 +135,10 @@ buildShedBtn.addEventListener('click', () => {
     if (gameState.resources.wood.count >= shedCost) {
         gameState.resources.wood.count -= shedCost;
         gameState.buildings.sheds += 1;
-        // todo increase max storage for all resources
-        gameState.resources.food.max += shedStorageIncrease; // increase food storage cap
+
+        // increase storage capacity
+        gameState.resources.food.max += shedStorageIncrease;
+        gameState.resources.wood.max += shedStorageIncrease;
         updateUI();
     }
 });
@@ -145,6 +149,7 @@ function updateUI() {
 
     foodDisplay.textContent = gameState.resources.food.count;
     maxFoodDisplay.textContent = gameState.resources.food.max;
+    maxWoodDisplay.textContent = gameState.resources.wood.max;
     woodDisplay.textContent = gameState.resources.wood.count;
     fieldsDisplay.textContent = gameState.buildings.fields;
     housingDisplay.textContent = gameState.buildings.houses;
@@ -182,6 +187,7 @@ function updateUI() {
     buildHouseBtn.disabled = gameState.resources.wood.count < housingCost;
     buildShedBtn.disabled = gameState.resources.wood.count < shedCost;
     gatherFoodBtn.disabled = gameState.resources.food.count >= gameState.resources.food.max;
+    gatherWoodBtn.disabled = gameState.resources.wood.count >= gameState.resources.wood.max;
 }
 
 // Initial UI update
