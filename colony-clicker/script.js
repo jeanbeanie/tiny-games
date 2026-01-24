@@ -1,4 +1,4 @@
-// Version: v0.3
+// Version: v0.4
 
 // Resources per click
 let foodPerClick = 1;
@@ -239,26 +239,82 @@ function triggerEvent(event) {
 }
 
 const events = [
-    {// todo add lastTriggeredTick to prevent same event spamming
+    {
         id: "hungry_travelers",
+        cooldown: 10, // in ticks (not implemented yet)
         trigger() {
             return gameState.resources.food.count > 20 &&
                 Math.random() < 0.05;
         },
         text: "Hungry travelers pass by your colony. They ask you to spare some food. One wants to join your colony.",
         choices: [
-            {
-                label: "Give them the food and let them join",
+            {   // NOTE: choice should be disabled when population is full (future UX improvement)
+                label: "Share food and welcome them (+1 population, -10 food)",
                 effect() {
-                    gameState.resources.food.count -= 10;
-                    gameState.population.count += 1;
+                    if (gameState.population.count < gameState.population.max) {
+                        gameState.resources.food.count -= 10;
+                        gameState.population.count += 1;
+                    }
                 }
             },
             {
                 label: "Turn them away",
                 effect() {
                     // nothing happens
-                    // TODO maybe something bad DOES happen later.
+                    // TODO maybe something bad DOES happen later. Like revenge.
+                }
+            }
+        ]
+    },
+    {
+        id: "worn_tools",
+        cooldown: 10,
+        trigger() {
+            return gameState.resources.wood.count > 20 &&
+                Math.random() < 0.05;
+        },
+        text: "Your gathering tools are wearing down. Productivity will suffer if they're not replaced.",
+        choices: [
+            {
+                label: "Spend wood to repair tools",
+                effect() {
+                    if (gameState.resources.wood.count >= 10) {
+                        gameState.resources.wood.count -= 10;
+                    }   
+                }
+            },
+            {
+                label: "Ignore it",
+                effect() {
+                    // TODO productivity penalty at a later time
+                }
+            }
+        ]
+    },
+    {
+        id: "small_fire",
+        cooldown: 10,
+        trigger() {
+            return gameState.buildings.sheds >= 1 &&
+                Math.random() < 0.05;
+        },
+        text: "A small fire breaks out near a storage shed!",
+        choices: [
+            {
+                label: "Use wood to smother the flames (-10 wood)",
+                effect() {
+                    if (gameState.resources.wood.count >= 10) {
+                        gameState.resources.wood.count -= 10;
+                    }
+                    // todo one person has a chance to die fighting the fire
+                }
+            },
+            {
+                label: "Ignore it",
+                effect() {
+                    if (gameState.buildings.sheds > 0) {
+                        gameState.buildings.sheds -= 1;
+                    }
                 }
             }
         ]
