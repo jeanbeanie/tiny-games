@@ -85,6 +85,9 @@ function clamp(value, min, max) {
 }
 
 setInterval(() => {
+    // todo : potentially pause while event is active
+    //if (gameState.eventIsActive) return;
+
     const foodPerColonist = getFoodPerColonist();
     const foodConsumption = gameState.population.count * foodPerColonist;
 
@@ -205,6 +208,9 @@ updateUI();
 
 // Events
 function checkForEvents() {
+    // guard against multiple events
+    if (gameState.eventIsActive) return;
+
     for (let event of events) {
         if (event.trigger()) {
             triggerEvent(event);
@@ -219,7 +225,7 @@ function triggerEvent(event) {
     eventDescription.textContent = event.text;
     eventChoice1.textContent = event.choices[0].label;
     eventChoice1.onclick = () => {
-        event.choices[0].effect();
+        event.choices[0].effect(); // todo clamp after effects
         gameState.eventIsActive = false;
         updateUI();
     };
@@ -233,7 +239,7 @@ function triggerEvent(event) {
 }
 
 const events = [
-    {
+    {// todo add lastTriggeredTick to prevent same event spamming
         id: "hungry_travelers",
         trigger() {
             return gameState.resources.food.count > 20 &&
