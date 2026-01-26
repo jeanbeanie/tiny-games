@@ -1,15 +1,26 @@
-// Version: v0.4
+// Version: v0.5
+
+
+const TICK_INTERVAL = 3000;
+const SAVE_KEY = "colonySave_v0.5";
+
+const COSTS = {
+    field: 10,
+    house: 20,
+    shed: 50,
+};
+
+const EFFECTS = {
+    foodPerField: 2,
+    populationPerHouse: 2,
+    shedStorageBonus: 50,
+};
 
 // Resources per click
+// potential constant var candidates
 let foodPerClick = 1;
 let woodPerClick = 1;
 
-let fieldCost = 10;
-let foodPerField = 2; // per tick
-let housingCost = 20;
-let populationPerHouse = 2;
-let shedCost = 50;
-let shedStorageIncrease = 50;
 
 // UI Elements
 const colonyStatus = document.getElementById('colony-status');
@@ -37,40 +48,60 @@ const buildHouseBtn = document.getElementById('build-house-btn');
 const buildShedBtn = document.getElementById('build-shed-btn');
 
 // Game State
-let gameState = {
-    resources: {
-        food: {
-            count: 0,
-            max: 100,
+let gameState = createNewGameState();
+
+function createNewGameState() {
+    return {
+        tick: 0,
+        resources: {
+            food: {
+                count: 0,
+                max: 100,
+            },
+            wood: {
+                count: 0,
+                max: 100,
+            },
         },
-        wood: {
-            count: 0,
-            max: 100,
+        buildings: {
+            fields: 0,
+            houses: 0,
+            sheds: 0,
         },
-        stone: {
-            count: 0,
-            max: 100,
+        population: {
+            count: 1,
+            max: 1,
+            starvationTicks: 0,
         },
-        gold: {
-            count: 0,
-            max: 100,
-        }
-    },
-    buildings: {
-        fields: 0,
-        houses: 0,
-        sheds: 0,
-    },
-    population: {
-        count: 1,
-        max: 1,
-    },
-    eventIsActive: false,
+        events: {
+            active: null,
+            history: {}, // eventID: lastTickOccurred
+        },
+    }
 }
+
+// Save and Load
+function saveGame() {
+    localStorage.setItem(SAVE_KEY, JSON.stringify(gameState));
+}
+
+function loadGame() {
+    const saved = localStorage.getItem(SAVE_KEY);
+    if (!saved) return;
+    try {
+        gameState = JSON.parse(saved);
+    } catch {
+        gameState = createNewGameState();
+    }
+}
+
+function abandonColony() {
+    localStorage.removeItem(SAVE_KEY);
+    gameState = createNewGameState();
+    updateUI();
+}
+
 // Game Tick - Resource Consumption
-
-
-let tickInterval = 3000; // 3 seconds
 
 function getFoodPerColonist() {
     const base = Math.ceil(gameState.population.count * 0.5);
@@ -84,15 +115,16 @@ function clamp(value, min, max) {
     return Math.max(min, Math.min(max, value));
 }
 
-setInterval(() => {
+function tick() {
+    gameState.tick++
     // todo : potentially pause while event is active
-    //if (gameState.eventIsActive) return;
+    //if (gameState.events.active) return;
 
     const foodPerColonist = getFoodPerColonist();
     const foodConsumption = gameState.population.count * foodPerColonist;
 
     // generate food from fields
-    const foodFromFields = gameState.buildings.fields * foodPerField;
+    const foodFromFields = gameState.buildings.fields * EFFECTS.foodPerField;
     gameState.resources.food.count += foodFromFields;
    
     // colonists consuming food
@@ -109,11 +141,12 @@ setInterval(() => {
         }
     }
 
-    //check for events
     checkForEvents();
-   
+    saveGame();
     updateUI();
-}, tickInterval);
+}
+
+setInterval(tick, TICK_INTERVAL);
 
 // Event Listeners
 
@@ -128,30 +161,30 @@ document.getElementById('gather-wood-btn').addEventListener('click', () => {
 });
 
 buildFieldBtn.addEventListener('click', () => {
-    if (gameState.resources.wood.count >= fieldCost) {
-        gameState.resources.wood.count -= fieldCost;
+    if (gameState.resources.wood.count >= COSTS.field) {
+        gameState.resources.wood.count -= COSTS.field;
         gameState.buildings.fields += 1;
         updateUI();
     }
 });
 
 buildHouseBtn.addEventListener('click', () => {
-    if (gameState.resources.wood.count >= housingCost) {
-        gameState.resources.wood.count -= housingCost;
+    if (gameState.resources.wood.count >= COSTS.house) {
+        gameState.resources.wood.count -= COSTS.house;
         gameState.buildings.houses += 1;
-        gameState.population.max += populationPerHouse;
+        gameState.population.max += EFFECTS.populationPerHouse;
         updateUI();
     }
 });
 
 buildShedBtn.addEventListener('click', () => {
-    if (gameState.resources.wood.count >= shedCost) {
-        gameState.resources.wood.count -= shedCost;
+    if (gameState.resources.wood.count >= COSTS.shed) {
+        gameState.resources.wood.count -= COSTS.shed;
         gameState.buildings.sheds += 1;
 
         // increase storage capacity
-        gameState.resources.food.max += shedStorageIncrease;
-        gameState.resources.wood.max += shedStorageIncrease;
+        gameState.resources.food.max += EFFECTS.shedStorageBonus;
+        gameState.resources.wood.max += EFFECTS.shedStorageBonus;
         updateUI();
     }
 });
@@ -159,6 +192,7 @@ buildShedBtn.addEventListener('click', () => {
 function updateUI() {
     const foodPerColonist = getFoodPerColonist();
     const foodConsumption = gameState.population.count * foodPerColonist;
+    console.log('in updateUI, gameState:', gameState);
 
     foodDisplay.textContent = gameState.resources.food.count;
     maxFoodDisplay.textContent = gameState.resources.food.max;
@@ -168,7 +202,7 @@ function updateUI() {
     housingDisplay.textContent = gameState.buildings.houses;
     shedDisplay.textContent = gameState.buildings.sheds;
     populationDisplay.textContent = gameState.population.count;
-    foodGainDisplay.textContent = gameState.buildings.fields * foodPerField;
+    foodGainDisplay.textContent = gameState.buildings.fields * EFFECTS.foodPerField;
     foodLossDisplay.textContent = foodConsumption;
 
     for (let elem of maxPopulationDisplays) {
@@ -194,11 +228,11 @@ function updateUI() {
     }
 
     colonyStatus.textContent = status;
-    eventBox.style.display = gameState.eventIsActive ? 'block' : 'none';
+    eventBox.style.display = gameState.events.active ? 'block' : 'none';
     // disable buttons if not enough resources
-    buildFieldBtn.disabled = gameState.resources.wood.count < fieldCost;
-    buildHouseBtn.disabled = gameState.resources.wood.count < housingCost;
-    buildShedBtn.disabled = gameState.resources.wood.count < shedCost;
+    buildFieldBtn.disabled = gameState.resources.wood.count < COSTS.field;
+    buildHouseBtn.disabled = gameState.resources.wood.count < COSTS.house;
+    buildShedBtn.disabled = gameState.resources.wood.count < COSTS.shed;
     gatherFoodBtn.disabled = gameState.resources.food.count >= gameState.resources.food.max;
     gatherWoodBtn.disabled = gameState.resources.wood.count >= gameState.resources.wood.max;
 }
@@ -209,30 +243,36 @@ updateUI();
 // Events
 function checkForEvents() {
     // guard against multiple events
-    if (gameState.eventIsActive) return;
+    if (gameState.events.active) return;
 
-    for (let event of events) {
+    for (const event of events) {
+        const lastTick = gameState.events.history[event.id] || 0;
+        console.log('checking event', event.id, 'lastTick:', lastTick, 'currentTick:', gameState.tick); 
+        if (gameState.tick - lastTick < event.cooldown)  continue; // still in cooldown
+        
         if (event.trigger()) {
             triggerEvent(event);
             console.log('event triggered', event)
-            break; // only one event active at a time
+            break; 
         }
     }
 }
 
 function triggerEvent(event) {
-    gameState.eventIsActive = true;
+    gameState.events.active = event.id;
+    gameState.events.history[event.id] = gameState.tick;
+
     eventDescription.textContent = event.text;
     eventChoice1.textContent = event.choices[0].label;
     eventChoice1.onclick = () => {
         event.choices[0].effect(); // todo clamp after effects
-        gameState.eventIsActive = false;
+        gameState.events.active = null;
         updateUI();
     };
     eventChoice2.textContent = event.choices[1].label;
     eventChoice2.onclick = () => {
         event.choices[1].effect();
-        gameState.eventIsActive = false;
+        gameState.events.active = null;
         updateUI();
     };
 
