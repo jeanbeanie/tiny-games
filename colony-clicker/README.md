@@ -1,26 +1,36 @@
-# Colony Clicker v0.4
+# Colony Clicker
 
-A minimal idle / clicker game prototype with a focus on player-driven decisions.
+A minimalist idle / incremental game about growing (and sometimes losing) a small colony over time.
 
-## Features
-- Manual resource gathering (food, wood)
-- Automated food production via fields
-- Population growth constrained by housing
-- Food consumption that scales with population
-- Storage buildings (sheds) that increase capacity and efficiency
-- Colony status feedback
-- Randomized events with player choices and consequences
+## Current Version
+**v0.5**
 
-Built with plain HTML, CSS, and JavaScript.
+This update focuses on core systems stability and long-term gameplay foundations.
 
-## Design Goals
-- Simple, readable systems
-- Small but meaningful player decisions
-- No frameworks or dependencies
-- Easy to extend and iterate on
+## Core Features
+- Gather food and wood
+- Build fields, houses, and storage sheds
+- Manage population growth and starvation
+- Random events with meaningful choices
+- Persistent save system (progress continues across refreshes)
 
-## Future Plans
-- More events and branching outcomes
-- Additional building types
-- Long-term progression systems
-- Save / load functionality
+## New in v0.5
+- Full game-state refactor for long-term stability
+- Persistent tick-based simulation
+- Population starvation and colony failure state
+- Event cooldowns and history tracking
+- Ability to abandon and reset a colony
+- Improved save/load reliability
+
+## How to Play
+- Click to gather resources
+- Build structures to increase production and capacity
+- Keep food production ahead of population needs
+- Respond to random events carefully
+
+## Roadmap (Short-Term)
+- Long-term event effects
+- UI improvements for events and feedback
+- Additional buildings and systems
+
+This project is under active development.

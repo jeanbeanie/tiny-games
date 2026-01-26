@@ -1,5 +1,19 @@
 # Tiny Games – Devlog
 
+### v0.5 – Systems & Survival Update
+
+This release was focused on cleaning up the game’s internal structure and laying the groundwork for future features.
+
+Key changes:
+- Refactored game state into a single persistent object
+- Added real tick tracking and event cooldowns
+- Implemented starvation mechanics and colony failure
+- Events now persist correctly across reloads
+- Added the ability to abandon and reset a colony
+- Improved save/load reliability across all actions
+
+This update doesn’t add a whole lot of fancy UI stuff, but it makes the game way more stable and robust for future devving. Future updates can build on this foundation.
+
 ## v0.4 – Colony Clicker (Events & Resource Constraints)
 **Date:** Jan 24, 2026
 

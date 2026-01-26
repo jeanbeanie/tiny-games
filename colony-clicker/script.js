@@ -98,6 +98,7 @@ function loadGame() {
 function abandonColony() {
     localStorage.removeItem(SAVE_KEY);
     gameState = createNewGameState();
+    saveGame();
     updateUI();
 }
 
@@ -111,8 +112,55 @@ function getFoodPerColonist() {
     return Math.max(1, Math.floor(base * (1 - reduction)));
 }
 
-function clamp(value, min, max) {
-    return Math.max(min, Math.min(max, value));
+
+function advanceEconomy() {
+    // Produce food
+    gameState.resources.food.count += gameState.buildings.fields * EFFECTS.foodPerField;
+
+    // Clamp
+    clampResource(gameState.resources.food);
+    clampResource(gameState.resources.wood);
+}
+function clampResource(resource) {
+    const { count, max } = resource;
+    resource.count = Math.max(0, Math.min(max, count));
+}
+function getFoodConsumption() {
+    return gameState.population.count * getFoodPerColonist();
+}
+
+const advancePopulation = () => {
+    const consumption = getFoodConsumption();
+    gameState.resources.food.count -= consumption;
+
+    // if excess food, chance to +1 population
+    if (gameState.resources.food.count >= consumption &&
+        gameState.population.count < gameState.population.max &&
+        Math.random() < 0.3) {
+        gameState.population.count++;
+    }
+    // Clamp
+    clampResource(gameState.resources.food);
+    clampResource(gameState.resources.wood);
+};
+
+function checkStarvation() {
+    if (gameState.resources.food.count > 0) {
+        gameState.population.starvationTicks = 0;
+        return;
+    }
+
+    gameState.population.starvationTicks++;
+
+    if (gameState.population.starvationTicks >= 3) {
+        gameState.population.count--;
+        gameState.population.starvationTicks = 0;
+
+        if (gameState.population.count <= 0) {
+            abandonColony();
+            alert("Your colony has fallen.");
+        }
+    }
 }
 
 function tick() {
@@ -120,43 +168,29 @@ function tick() {
     // todo : potentially pause while event is active
     //if (gameState.events.active) return;
 
-    const foodPerColonist = getFoodPerColonist();
-    const foodConsumption = gameState.population.count * foodPerColonist;
-
-    // generate food from fields
-    const foodFromFields = gameState.buildings.fields * EFFECTS.foodPerField;
-    gameState.resources.food.count += foodFromFields;
-   
-    // colonists consuming food
-    gameState.resources.food.count -= foodConsumption;
-
-    // Clamp resources => constrain to btwn 0 to max storage capacity
-    gameState.resources.food.count = clamp(gameState.resources.food.count, 0, gameState.resources.food.max);
-    gameState.resources.wood.count = clamp(gameState.resources.wood.count, 0, gameState.resources.wood.max);
-
-    // if food surplus exists, chance to +1 population
-    if (gameState.resources.food.count >= foodConsumption && gameState.population.count < gameState.population.max) {
-        if (Math.random() < 0.3) { // 30% chance to grow 
-            gameState.population.count += 1;
-        }
-    }
-
+    
+    advancePopulation();
+    advanceEconomy();
+    checkStarvation();
     checkForEvents();
+
     saveGame();
     updateUI();
 }
-
+loadGame();
 setInterval(tick, TICK_INTERVAL);
 
 // Event Listeners
 
 gatherFoodBtn.addEventListener('click', () => {
     gameState.resources.food.count += foodPerClick;
+    saveGame();
     updateUI();
 });
 
 document.getElementById('gather-wood-btn').addEventListener('click', () => {
     gameState.resources.wood.count += woodPerClick;
+    saveGame();
     updateUI();
 });
 
@@ -164,6 +198,7 @@ buildFieldBtn.addEventListener('click', () => {
     if (gameState.resources.wood.count >= COSTS.field) {
         gameState.resources.wood.count -= COSTS.field;
         gameState.buildings.fields += 1;
+        saveGame();
         updateUI();
     }
 });
@@ -173,6 +208,7 @@ buildHouseBtn.addEventListener('click', () => {
         gameState.resources.wood.count -= COSTS.house;
         gameState.buildings.houses += 1;
         gameState.population.max += EFFECTS.populationPerHouse;
+        saveGame();
         updateUI();
     }
 });
@@ -185,6 +221,7 @@ buildShedBtn.addEventListener('click', () => {
         // increase storage capacity
         gameState.resources.food.max += EFFECTS.shedStorageBonus;
         gameState.resources.wood.max += EFFECTS.shedStorageBonus;
+        saveGame();
         updateUI();
     }
 });
@@ -267,12 +304,14 @@ function triggerEvent(event) {
     eventChoice1.onclick = () => {
         event.choices[0].effect(); // todo clamp after effects
         gameState.events.active = null;
+        saveGame();
         updateUI();
     };
     eventChoice2.textContent = event.choices[1].label;
     eventChoice2.onclick = () => {
         event.choices[1].effect();
         gameState.events.active = null;
+        saveGame();
         updateUI();
     };
 
