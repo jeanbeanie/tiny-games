@@ -4,6 +4,8 @@ Tiny Games is a collection of small, experimental web games built as creative ex
 
 These games are intentionally simple, prototype-focused, and developed in the open.
 
+The games will be added to and iterated over time as part of my ongoing creative practice.
+
 ## Philosophy
 - Small scope, big ideas
 - Minimal polish, intentional design
