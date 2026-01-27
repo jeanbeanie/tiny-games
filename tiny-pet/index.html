@@ -1,0 +1,39 @@
+﻿<html>
+<head>
+    <title>Tiny Pet</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <h1>🐾 Tiny Pet</h1>
+
+    <div id="pet">
+        <div id="pet-name">Bean</div>
+        <div id="pet-face">😊</div>
+        <div id="pet-mood" class="text-line">Happy</div>
+        <div id="pet-flavor-text" class="text-line">...</div>
+    </div>
+
+    <div class="stat">
+        Hunger
+        <div class="bar"><div id="hunger-bar"></div></div>
+    </div>
+
+    <div class="stat">
+        Happiness
+        <div class="bar"><div id="happiness-bar"></div></div>
+    </div>
+
+    <div class="stat">
+        Energy
+        <div class="bar"><div id="energy-bar"></div></div>
+    </div>
+
+    <button id="feed-btn">🥭 Feed</button>
+    <button id="play-btn">🧸 Play</button>
+    <button id="sleep-btn">💤 Read a bedtime story</button>
+    <div id="reset-link"><a onclick="resetPet()">Reset Pet</a></div>
+    <div id="about-text" class="text-line">Tiny Pet v0.3 - A tiny prototype virtual pet. Stats update over time, even while you’re away.</div>
+
+    <script src="script.js"></script>
+</body>
+</html>

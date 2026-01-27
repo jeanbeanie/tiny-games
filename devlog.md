@@ -1,6 +1,20 @@
 # Tiny Games – Devlog
 
-### v0.5 – Systems & Survival Update
+### Tiny Pet v0.3 – Mood & Polish Update
+**Date:** Jan 27, 2026
+
+This update focused on the game's feel rather than adding new systems.
+
+Changes:
+- Added explicit pet moods and flavor text
+- Refactored UI state handling for button cooldowns vs stat-based disabling
+- Improved feedback when interacting with the pet
+- Tightened game-over logic and reset flow
+- General polish pass for Tiny Games release
+
+This version is the first to feel like a stable prototype.
+
+### Colony Clicker v0.5 – Systems & Survival Update
 
 This release was focused on cleaning up the game’s internal structure and laying the groundwork for future features.
 
@@ -14,7 +28,7 @@ Key changes:
 
 This update doesn’t add a whole lot of fancy UI stuff, but it makes the game way more stable and robust for future devving. Future updates can build on this foundation.
 
-## v0.4 – Colony Clicker (Events & Resource Constraints)
+## Colony Clicker v0.4 (Events & Resource Constraints)
 **Date:** Jan 24, 2026
 
 #### What changed
@@ -38,7 +52,7 @@ Events add narrative flavor and decision-making without complicating the core lo
 - Explore early progression or specializations
 - Continue refining
 
-## v0.3 – Colony Clicker (Initial Public Prototype)
+## Colony Clickerv v0.3 (Initial Public Prototype)
 **Date:** Jan 19, 2026
 
 #### What changed
