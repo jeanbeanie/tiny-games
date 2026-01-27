@@ -28,6 +28,13 @@
 
         .project {
             margin: 2rem 0;
+            padding: 1.25rem;
+            background: #161616;
+            border-radius: 6px;
+        }
+        .project-version {
+            color: #aaa;
+            font-size: 0.9rem
         }
         .site-intro {
             max-width: 600px;
@@ -35,29 +42,51 @@
             line-height: 1.6;
             margin-bottom: 2rem;
         }
+        #subtitle {
+            color: #aaa;
+            margin-top: 0;
+        }
+        footer {
+            margin-top: 4rem;
+            color: #666;
+            font-size: 0.85rem;
+        }
     </style>
 </head>
 <body>
 
     <h1>Tiny Games</h1>
+    <p id="subtitle">
+        by Jeane Ramos
+    </p>
     <h3>Small games & experiments.</h3>
     <p class="site-intro">
         Tiny Games is a small collection of experimental idle and clicker games.
-        This site is a living dev space, so expect simple mechanics and slow iterations.
+        These are intentionally small projects focused on systems, pacing, and player feedback.
     </p>
 
     <div class="project">
         <h2>Colony Clicker</h2>
+        <p class="project-version">
+            Status: Active development · v0.5
+        </p>
         <p>A prototype incremental colony sim.</p>
         <a href="./colony-clicker/">Play →</a>
     </div>
     <div class="project">
         <h2>Tiny Pet</h2>
+        <p class="project-version">
+            Status: Prototype · v0.3
+        </p>
         <p>
             A tiny virtual pet prototype.
             Care for your pet, check in over time, and see how their mood changes based on how you treat them.
         </p>
         <a href="./tiny-pet/">Play →</a>
     </div>
+    <footer>
+        Built with plain HTML, CSS, and JavaScript.
+        <a href="https://github.com/jeanbeanie/tiny-games">Source on GitHub</a>
+    </footer>
 </body>
 </html>
