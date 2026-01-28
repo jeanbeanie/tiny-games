@@ -105,7 +105,9 @@ function abandonColony() {
 // Game Tick - Resource Consumption
 
 function getFoodPerColonist() {
+    // base consumption is 50% of a colonist
     const base = Math.ceil(gameState.population.count * 0.5);
+
     // sheds reduce food consumption by 5% each
     // todo cap reduction
     const reduction = gameState.buildings.sheds * 0.05;
@@ -116,10 +118,6 @@ function getFoodPerColonist() {
 function advanceEconomy() {
     // Produce food
     gameState.resources.food.count += gameState.buildings.fields * EFFECTS.foodPerField;
-
-    // Clamp
-    clampResource(gameState.resources.food);
-    clampResource(gameState.resources.wood);
 }
 function clampResource(resource) {
     const { count, max } = resource;
@@ -139,9 +137,6 @@ const advancePopulation = () => {
         Math.random() < 0.3) {
         gameState.population.count++;
     }
-    // Clamp
-    clampResource(gameState.resources.food);
-    clampResource(gameState.resources.wood);
 };
 
 function checkStarvation() {
@@ -168,12 +163,15 @@ function tick() {
     // todo : potentially pause while event is active
     //if (gameState.events.active) return;
 
-    
+   
     advancePopulation();
     advanceEconomy();
     checkStarvation();
     checkForEvents();
 
+    // clamp resources after all changes
+    clampResource(gameState.resources.food);
+    clampResource(gameState.resources.wood);
     saveGame();
     updateUI();
 }
