@@ -1,9 +1,10 @@
-// Version: v0.5
+// Version: v0.6
 
 
 const TICK_INTERVAL = 3000;
-const SAVE_KEY = "colonySave_v0.5";
+const SAVE_KEY = "colonySave_v0.6";
 
+//todo refactor costs and effects into data structures
 const COSTS = {
     field: 10,
     house: 20,
@@ -15,6 +16,20 @@ const EFFECTS = {
     populationPerHouse: 2,
     shedStorageBonus: 50,
 };
+
+const GRANARY = {
+    cost: 90,
+    foodStorageBonus: 150,
+
+    // TODO v0.7: Colonist roles may affect spoilage chance
+    // TODO v0.7: Granary workers reduce food loss instead of chance
+    spoilage: {
+        thresholdRatio: 0.7, // % of max food when spoilage starts
+        chancePerTick: 0.08, // chance of spoilage occurring per tick when above threshold
+        lossAmount: 8, // amount of food lost when spoilage occurs
+        mitigationPerGranary: 0.03, // reduction in chance per granary
+    }
+}
 
 // Resources per click
 // potential constant var candidates
@@ -36,6 +51,7 @@ const woodDisplay = document.getElementById('wood-gathered');
 const fieldsDisplay = document.getElementById('fields-count');
 const housingDisplay = document.getElementById('housing-count');
 const shedDisplay = document.getElementById('shed-count');
+const granaryDisplay = document.getElementById('granary-count');
 const populationDisplay = document.getElementById('population-count');
 const maxPopulationDisplays = document.getElementsByClassName('max-population-count');
 const foodGainDisplay = document.getElementById('food-gain-per-tick');
@@ -46,6 +62,7 @@ const gatherWoodBtn = document.getElementById('gather-wood-btn');
 const buildFieldBtn = document.getElementById('build-field-btn');
 const buildHouseBtn = document.getElementById('build-house-btn');
 const buildShedBtn = document.getElementById('build-shed-btn');
+const buildGranaryBtn = document.getElementById('build-granary-btn');
 
 // Game State
 let gameState = createNewGameState();
@@ -67,6 +84,7 @@ function createNewGameState() {
             fields: 0,
             houses: 0,
             sheds: 0,
+            granaries: 0,
         },
         population: {
             count: 1,
@@ -118,6 +136,7 @@ function getFoodPerColonist() {
 function advanceEconomy() {
     // Produce food
     gameState.resources.food.count += gameState.buildings.fields * EFFECTS.foodPerField;
+    clampResource(gameState.resources.food);
 }
 function clampResource(resource) {
     const { count, max } = resource;
@@ -158,6 +177,28 @@ function checkStarvation() {
     }
 }
 
+function checkFoodSpoilage() {
+    const food = gameState.resources.food;
+    const threshold = food.max * GRANARY.spoilage.thresholdRatio;
+
+    if (food.count > threshold) {
+        //reduce spoilage chance based on granaries owned
+        const mitigation = gameState.buildings.granaries * GRANARY.spoilage.mitigationPerGranary;
+        const spoilageChance = Math.max(0, GRANARY.spoilage.chancePerTick - mitigation);
+        
+        if (Math.random() < spoilageChance) {
+            gameState.resources.food.count -= GRANARY.spoilage.lossAmount;
+            clampResource(gameState.resources.food);
+            // refactor : event system
+            triggerSpoilageEvent();
+        }
+    }
+}
+
+function triggerSpoilageEvent() {
+    console.log("Food spoilage event triggered");
+}
+
 function tick() {
     gameState.tick++
     // todo : potentially pause while event is active
@@ -166,6 +207,7 @@ function tick() {
    
     advancePopulation();
     advanceEconomy();
+    checkFoodSpoilage();
     checkStarvation();
     checkForEvents();
 
@@ -224,10 +266,21 @@ buildShedBtn.addEventListener('click', () => {
     }
 });
 
+buildGranaryBtn.addEventListener('click', () => {
+    if (gameState.resources.wood.count >= GRANARY.cost) {
+        gameState.resources.wood.count -= GRANARY.cost;
+        gameState.buildings.granaries += 1;
+
+        // increase food storage capacity
+        gameState.resources.food.max += GRANARY.foodStorageBonus;
+        saveGame();
+        updateUI();
+    }
+});
+
 function updateUI() {
     const foodPerColonist = getFoodPerColonist();
     const foodConsumption = gameState.population.count * foodPerColonist;
-    console.log('in updateUI, gameState:', gameState);
 
     foodDisplay.textContent = gameState.resources.food.count;
     maxFoodDisplay.textContent = gameState.resources.food.max;
@@ -236,6 +289,7 @@ function updateUI() {
     fieldsDisplay.textContent = gameState.buildings.fields;
     housingDisplay.textContent = gameState.buildings.houses;
     shedDisplay.textContent = gameState.buildings.sheds;
+    granaryDisplay.textContent = gameState.buildings.granaries;
     populationDisplay.textContent = gameState.population.count;
     foodGainDisplay.textContent = gameState.buildings.fields * EFFECTS.foodPerField;
     foodLossDisplay.textContent = foodConsumption;
@@ -263,11 +317,13 @@ function updateUI() {
     }
 
     colonyStatus.textContent = status;
+    // todo BUG : eventIsActive not updating properly
     eventBox.style.display = gameState.events.active ? 'block' : 'none';
     // disable buttons if not enough resources
     buildFieldBtn.disabled = gameState.resources.wood.count < COSTS.field;
     buildHouseBtn.disabled = gameState.resources.wood.count < COSTS.house;
     buildShedBtn.disabled = gameState.resources.wood.count < COSTS.shed;
+    buildGranaryBtn.disabled = gameState.resources.wood.count < GRANARY.cost;
     gatherFoodBtn.disabled = gameState.resources.food.count >= gameState.resources.food.max;
     gatherWoodBtn.disabled = gameState.resources.wood.count >= gameState.resources.wood.max;
 }
@@ -282,7 +338,7 @@ function checkForEvents() {
 
     for (const event of events) {
         const lastTick = gameState.events.history[event.id] || 0;
-        console.log('checking event', event.id, 'lastTick:', lastTick, 'currentTick:', gameState.tick); 
+        //console.log('checking event', event.id, 'lastTick:', lastTick, 'currentTick:', gameState.tick); 
         if (gameState.tick - lastTick < event.cooldown)  continue; // still in cooldown
         
         if (event.trigger()) {
@@ -328,7 +384,7 @@ const events = [
             {   // NOTE: choice should be disabled when population is full (future UX improvement)
                 label: "Share food and welcome them (+1 population, -10 food)",
                 effect() {
-                    if (gameState.population.count < gameState.population.max) {
+                    if (gameState.population.count < gameState.population.max && gameState.resources.food.count >= 10) {
                         gameState.resources.food.count -= 10;
                         gameState.population.count += 1;
                     }
@@ -357,7 +413,7 @@ const events = [
                 effect() {
                     if (gameState.resources.wood.count >= 10) {
                         gameState.resources.wood.count -= 10;
-                    }   
+                    }
                 }
             },
             {
