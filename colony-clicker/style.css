@@ -54,8 +54,31 @@ button {
         padding: 0.6rem 1rem;
     }
 
+.feedback-tooltip {
+    position: absolute;
+    pointer-events: none;
+    font-size: 0.9rem;
+    opacity: 0.9;
+    animation: floatUp 0.6s ease-out forwards;
+}
+
+@keyframes floatUp {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    to {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+}
+
 .version {
     font-size: 0.6em;
     color: #999;
     margin-left: 0.4rem;
+}
+#colony-status {
+    font-style: italic;
 }
