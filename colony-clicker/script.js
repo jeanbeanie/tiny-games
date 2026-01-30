@@ -195,9 +195,7 @@ function tick() {
     saveGame();
     updateUI();
 }
-// Start the game loop
-loadGame();
-setInterval(tick, TICK_INTERVAL);
+
 
 
 // ======================
@@ -205,6 +203,10 @@ setInterval(tick, TICK_INTERVAL);
 // ======================
 function triggerSpoilageEvent() {
     console.log("Food spoilage event triggered");
+}
+
+function getEventById(id) {
+    return events.find(e => e.id === id) || null;
 }
 
 function checkForEvents() {
@@ -227,29 +229,34 @@ function checkForEvents() {
 function triggerEvent(event) {
     gameState.events.active = event.id;
     gameState.events.history[event.id] = gameState.tick;
+   
+    renderActiveEvent(event);
+}
 
+const renderActiveEvent = (event) => {
     eventDescription.textContent = event.text;
     eventChoice1.textContent = event.choices[0].label;
     eventChoice1.onclick = () => {
-        event.choices[0].effect(); // todo clamp after effects
-        gameState.events.active = null;
-        saveGame();
-        updateUI();
+        resolveEventChoice(event, 0);
     };
     eventChoice2.textContent = event.choices[1].label;
     eventChoice2.onclick = () => {
-        event.choices[1].effect();
-        gameState.events.active = null;
-        saveGame();
-        updateUI();
+        resolveEventChoice(event, 1);
     };
+    eventBox.style.display = 'block';
+}
 
+function resolveEventChoice(event, choiceIndex) {
+    event.choices[choiceIndex].effect();
+    gameState.events.active = null;
+    saveGame();
+    updateUI();
 }
 
 const events = [
     {
         id: "hungry_travelers",
-        cooldown: 10, // in ticks (not implemented yet)
+        cooldown: 10,
         trigger() {
             return gameState.resources.food.count > 20 &&
                 Math.random() < 0.05;
@@ -387,6 +394,7 @@ buildHouseBtn.addEventListener('click', () => {
     if (gameState.resources.wood.count >= COSTS.house) {
         gameState.resources.wood.count -= COSTS.house;
         gameState.buildings.houses += 1;
+        // todo create func to apply effects
         gameState.population.max += EFFECTS.populationPerHouse;
         saveGame();
         updateUI();
@@ -438,6 +446,7 @@ function updateUI() {
     const foodSurplus = gameState.resources.food.count - getTotalFoodConsumption();
 
     // update colony status text
+    // todo extract to function
     let status = "";
     if (gameState.resources.food.count === 0) {
         status = "The colony is starving.";
@@ -464,6 +473,22 @@ function updateUI() {
     gatherFoodBtn.disabled = gameState.resources.food.count >= gameState.resources.food.max;
     gatherWoodBtn.disabled = gameState.resources.wood.count >= gameState.resources.wood.max;
 }
+
+// ======================
+// START THE GAME
+// ======================
+
+loadGame();
+if (gameState.events.active) {
+    const event = getEventById(gameState.events.active);
+    if (event) {
+        renderActiveEvent(event);
+    } else {
+        // safety: invalid event id
+        gameState.events.active = null;
+    }
+}
+setInterval(tick, TICK_INTERVAL);
 
 // Initial UI update
 updateUI();
