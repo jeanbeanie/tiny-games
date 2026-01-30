@@ -1,11 +1,37 @@
 # Tiny Games – Devlog
 
-### Tiny Pet v0.3 – Mood & Polish Update
+## Colony Clicker v0.6 - Mo' Food Mo' Problems
+**Date:** Jan 30, 2026
+
+This update introduces the Granary building, an option to better manage food.
+With greater food storage comes greater risk, food can now spoil if hoarded and unused for too long. 
+Granaries help mitigate this risk by reducing spoilage chances.
+
+#### What's Added
+- Granary building
+  - Increases food storage
+  - Reduces the chance of food spoilage
+- Food spoilage system
+  - Excess food can now be lost if storage maxxed out for too long
+- Show temporary statuses for relevant events (e.g., starvation and food spoilage warnings)
+
+#### What's Changed
+- Cleaned up population and food code structure
+- General code cleanup in preparation for the future
+- Improved event handling
+  - Active events now persist across page reloads
+
+#### Future update ideas:
+- Colonist roles
+- More events and event variety
+- UI polishing
+
+## Tiny Pet v0.3 – Mood & Polish Update
 **Date:** Jan 27, 2026
 
 This update focused on the game's feel rather than adding new systems.
 
-Changes:
+#### Changes:
 - Added explicit pet moods and flavor text
 - Refactored UI state handling for button cooldowns vs stat-based disabling
 - Improved feedback when interacting with the pet
@@ -14,11 +40,11 @@ Changes:
 
 This version is the first to feel like a stable prototype.
 
-### Colony Clicker v0.5 – Systems & Survival Update
+## Colony Clicker v0.5 – Systems & Survival Update
 
 This release was focused on cleaning up the game’s internal structure and laying the groundwork for future features.
 
-Key changes:
+#### Key changes:
 - Refactored game state into a single persistent object
 - Added real tick tracking and event cooldowns
 - Implemented starvation mechanics and colony failure

@@ -4,8 +4,8 @@
 	<link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <h1>Colony Clicker</h1>
-    <div id="event-box">
+    <h1>Colony Clicker <span class="version">v0.6</span></h1>
+    <div id="event-box" style="display:none;">
         <p id="event-description"></p>
         <button id="event-choice-1">Choice 1</button>
         <button id="event-choice-2">Choice 2</button>
@@ -40,9 +40,15 @@
             Build Shed (50 wood)
         </button>
     </p>
-    <p><a onclick="abandonColony()" class="back-link">❌ Abandon Colony</a></p>
-    <a href="../index.html" class="back-link">← Back to Tiny Games</a>
-    <script src="script.js"></script>
+    <p>
+        Granary: <span id="granary-count">0</span>
+        <button title="Increases food storage by 150 and reduces food spoilage chance by 3% per granary"
+                id="build-granary-btn">
+            Build Granary (90 wood)
+            </button>
+            <p><a onclick="abandonColony()" class="back-link">❌ Abandon Colony</a></p>
+            <a href="../index.html" class="back-link">← Back to Tiny Games</a>
+            <script src="script.js"></script>
 </body>
 
 

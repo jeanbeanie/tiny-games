@@ -53,3 +53,9 @@ button {
         background-color: #222222;
         padding: 0.6rem 1rem;
     }
+
+.version {
+    font-size: 0.6em;
+    color: #999;
+    margin-left: 0.4rem;
+}

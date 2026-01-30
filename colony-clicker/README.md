@@ -3,14 +3,14 @@
 A minimalist idle / incremental game about growing (and sometimes losing) a small colony over time.
 
 ## Current Version
-**v0.5**
+**v0.6**
 
 This update focuses on core systems stability and long-term gameplay foundations.
 
 ## Core Features
-- Gather food and wood
-- Build fields, houses, and storage sheds
-- Manage population growth and starvation
+- Gather food and wood to keep your colony alive
+- Build fields, houses, and storage sheds to grow your economy
+- Manage population growth, starvation, food spoilage, and more
 - Random events with meaningful choices
 - Persistent save system (progress continues across refreshes)
 
@@ -29,8 +29,8 @@ This update focuses on core systems stability and long-term gameplay foundations
 - Respond to random events carefully
 
 ## Roadmap (Short-Term)
-- Long-term event effects
-- UI improvements for events and feedback
-- Additional buildings and systems
+- Colonist specializations and roles
+- UI improvements / animations
+- Additional buildings and events
 
-This project is under active development.
+This project is under active development and is expected to change frequently.
