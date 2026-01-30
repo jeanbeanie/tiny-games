@@ -49,6 +49,8 @@ let gameState = createNewGameState();
 function createNewGameState() {
     return {
         tick: 0,
+        statusMessage: null,
+        statusUntilTick: 0,
         resources: {
             food: {
                 count: 0,
@@ -102,7 +104,10 @@ function abandonColony() {
 // ======================
 // CORE SYSTEMS (tick logic)
 // ======================
-
+function setTemporaryStatus(message, durationTicks = 2) {
+    gameState.statusMessage = message;
+    gameState.statusUntilTick = gameState.tick + durationTicks;
+}
 function getFoodPerColonist() {
     // base consumption is 50% of a colonist
     const base = Math.ceil(gameState.population.count * 0.5);
@@ -129,12 +134,15 @@ function clampResource(resource) {
 
 const advancePopulation = () => {
     const consumption = getTotalFoodConsumption();
-    gameState.resources.food.count -= consumption;
+    const hasFoodSurplus = gameState.resources.food.count >= consumption;
+    const hasHousingSpace = gameState.population.count < gameState.population.max;
 
-    // if excess food, chance to +1 population
-    if (gameState.resources.food.count >= consumption &&
-        gameState.population.count < gameState.population.max &&
-        Math.random() < 0.3) {
+    // consume food
+    gameState.resources.food.count -= consumption;
+    clampResource(gameState.resources.food);
+
+    // chance to +1 population if the conditions are right
+    if (hasFoodSurplus && hasHousingSpace && Math.random() < 0.3) {
         gameState.population.count++;
     }
 };
@@ -147,9 +155,10 @@ function checkStarvation() {
 
     gameState.population.starvationTicks++;
 
-    if (gameState.population.starvationTicks >= 3) {
+    if (gameState.population.starvationTicks >= 5) {
         gameState.population.count--;
         gameState.population.starvationTicks = 0;
+        setTemporaryStatus("A colonist has starved to death.");
 
         if (gameState.population.count <= 0) {
             abandonColony();
@@ -202,7 +211,7 @@ function tick() {
 // EVENTS SYSTEM
 // ======================
 function triggerSpoilageEvent() {
-    console.log("Food spoilage event triggered");
+    setTemporaryStatus("Food has spoiled in storage.");
 }
 
 function getEventById(id) {
@@ -249,6 +258,7 @@ const renderActiveEvent = (event) => {
 function resolveEventChoice(event, choiceIndex) {
     event.choices[choiceIndex].effect();
     gameState.events.active = null;
+    eventBox.style.display = 'none';
     saveGame();
     updateUI();
 }
@@ -449,22 +459,30 @@ function updateUI() {
     // todo extract to function
     let status = "";
     if (gameState.resources.food.count === 0) {
-        status = "The colony is starving.";
+        status = "The colony is starving, we need more food!";
     } else if (foodSurplus < 10*gameState.population.count) {
         status = "The colony is surviving...just barely.";
     } else if (foodSurplus > 0 && gameState.population.count < gameState.population.max) {
-        status = "The colony is growing (space available).";
+        status = "The colony is thriving (space available).";
     } else {
+        // todo future event where the status first subtly says "the colony is stable...lets fix that",
+        // and it means something horrible is about to happen.
         status = "The colony is stable.";
     }
 
     if (gameState.resources.food.count == gameState.resources.food.max) {
-        status += " Food storage is full!";
+        status += " Food storage is full! It's hard keeping food fresh.";
     }
 
-    colonyStatus.textContent = status;
-    // todo BUG : eventIsActive should be set to false if window is refreshed during event
-    eventBox.style.display = gameState.events.active ? 'block' : 'none';
+    // show temporary status messages over default status
+    if (gameState.statusMessage && gameState.tick <= gameState.statusUntilTick) {
+        colonyStatus.textContent = gameState.statusMessage;
+    } else {
+        gameState.statusMessage = null;
+        colonyStatus.textContent = status;
+    }
+
+    //eventBox.style.display = gameState.events.active ? 'block' : 'none';
     // disable buttons if not enough resources
     buildFieldBtn.disabled = gameState.resources.wood.count < COSTS.field;
     buildHouseBtn.disabled = gameState.resources.wood.count < COSTS.house;
