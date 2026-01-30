@@ -1,4 +1,4 @@
-// Version: v0.6
+﻿// Version: v0.6
 
 // ======================
 // CONFIG / CONSTANTS
@@ -29,7 +29,7 @@ const GRANARY = {
     spoilage: {
         thresholdRatio: 0.7, // % of max food when spoilage starts
         chancePerTick: 0.08, // chance of spoilage occurring per tick when above threshold
-        lossAmount: 8, // amount of food lost when spoilage occurs
+        lossAmount: 8, // amount of food lost when spoilage occurs, todo make it a range
         mitigationPerGranary: 0.03, // reduction in chance per granary
     }
 }
@@ -54,11 +54,11 @@ function createNewGameState() {
         resources: {
             food: {
                 count: 0,
-                max: 100,
+                max: 100, // todo calculate based on buildings
             },
             wood: {
                 count: 0,
-                max: 100,
+                max: 100, // todo calculate based on buildings
             },
         },
         buildings: {
@@ -69,7 +69,7 @@ function createNewGameState() {
         },
         population: {
             count: 1,
-            max: 1,
+            max: 1, // todo calculate based on houses
             starvationTicks: 0,
         },
         events: {
@@ -139,11 +139,14 @@ const advancePopulation = () => {
 
     // consume food
     gameState.resources.food.count -= consumption;
-    clampResource(gameState.resources.food);
+    // why does clamping here cause gameState.resources.food.count to not update properly??
+    //clampResource(gameState.resources.food);
 
     // chance to +1 population if the conditions are right
     if (hasFoodSurplus && hasHousingSpace && Math.random() < 0.3) {
         gameState.population.count++;
+        setTemporaryStatus("A new colonist has joined the colony!");
+        showFeedbackTooltip(populationDisplay, "+1 👥");
     }
 };
 
@@ -159,7 +162,7 @@ function checkStarvation() {
         gameState.population.count--;
         gameState.population.starvationTicks = 0;
         setTemporaryStatus("A colonist has starved to death.");
-
+        showFeedbackTooltip(populationDisplay, "-1 💀");
         if (gameState.population.count <= 0) {
             abandonColony();
             alert("Your colony has fallen.");
@@ -211,7 +214,8 @@ function tick() {
 // EVENTS SYSTEM
 // ======================
 function triggerSpoilageEvent() {
-    setTemporaryStatus("Food has spoiled in storage.");
+    setTemporaryStatus("Some food has spoiled in storage.");
+    showFeedbackTooltip(foodDisplay, `- ${GRANARY.spoilage.lossAmount} 🌽`);
 }
 
 function getEventById(id) {
@@ -229,7 +233,7 @@ function checkForEvents() {
 
         if (event.trigger()) {
             triggerEvent(event);
-            console.log('event triggered', event)
+            //console.log('event triggered', event)
             break;
         }
     }
@@ -266,7 +270,7 @@ function resolveEventChoice(event, choiceIndex) {
 const events = [
     {
         id: "hungry_travelers",
-        cooldown: 10,
+        cooldown: 40,
         trigger() {
             return gameState.resources.food.count > 20 &&
                 Math.random() < 0.05;
@@ -274,6 +278,7 @@ const events = [
         text: "Hungry travelers pass by your colony. They ask you to spare some food. One wants to join your colony.",
         choices: [
             {   // NOTE: choice should be disabled when population is full (future UX improvement)
+                // todo allow overflow population with penalties later
                 label: "Share food and welcome them (+1 population, -10 food)",
                 effect() {
                     if (gameState.population.count < gameState.population.max && gameState.resources.food.count >= 10) {
@@ -293,7 +298,7 @@ const events = [
     },
     {
         id: "worn_tools",
-        cooldown: 10,
+        cooldown: 50,
         trigger() {
             return gameState.resources.wood.count > 20 &&
                 Math.random() < 0.05;
@@ -318,7 +323,7 @@ const events = [
     },
     {
         id: "small_fire",
-        cooldown: 10,
+        cooldown: 30,
         trigger() {
             return gameState.buildings.sheds >= 1 &&
                 Math.random() < 0.05;
@@ -339,6 +344,13 @@ const events = [
                 effect() {
                     if (gameState.buildings.sheds > 0) {
                         gameState.buildings.sheds -= 1;
+
+                        // decrease storage capacity
+                        gameState.resources.food.max -= EFFECTS.shedStorageBonus;
+                        gameState.resources.wood.max -= EFFECTS.shedStorageBonus;
+
+                        setTemporaryStatus("A storage shed was lost to the fire.");
+                        showFeedbackTooltip(shedDisplay, "-1 🛖");
                     }
                 }
             }
@@ -377,16 +389,35 @@ const buildHouseBtn = document.getElementById('build-house-btn');
 const buildShedBtn = document.getElementById('build-shed-btn');
 const buildGranaryBtn = document.getElementById('build-granary-btn');
 
+function showFeedbackTooltip(targetElement, text) {
+    const tooltip= document.createElement("span");
+    tooltip.className = "feedback-tooltip";
+    tooltip.textContent = text;
+
+    const rect = targetElement.getBoundingClientRect();
+
+    tooltip.style.left = rect.left + rect.width / 2 + "px";
+    tooltip.style.top = (rect.top - 20) + "px";
+
+    document.body.appendChild(tooltip);
+
+    setTimeout(() => {
+        tooltip.remove();
+    }, 600);
+}
+
 // Event Listeners
 
 gatherFoodBtn.addEventListener('click', () => {
     gameState.resources.food.count += foodPerClick;
+    showFeedbackTooltip(gatherFoodBtn, `+${foodPerClick} 🌽`);
     saveGame();
     updateUI();
 });
 
 document.getElementById('gather-wood-btn').addEventListener('click', () => {
     gameState.resources.wood.count += woodPerClick;
+    showFeedbackTooltip(gatherWoodBtn, `+${woodPerClick} 🪵`);
     saveGame();
     updateUI();
 });
