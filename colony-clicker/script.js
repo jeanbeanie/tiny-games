@@ -1,5 +1,8 @@
 // Version: v0.6
 
+// ======================
+// CONFIG / CONSTANTS
+// ======================
 
 const TICK_INTERVAL = 3000;
 const SAVE_KEY = "colonySave_v0.6";
@@ -37,34 +40,10 @@ let foodPerClick = 1;
 let woodPerClick = 1;
 
 
-// UI Elements
-const colonyStatus = document.getElementById('colony-status');
-const eventBox = document.getElementById('event-box');
-const eventDescription = document.getElementById('event-description');
-const eventChoice1 = document.getElementById('event-choice-1'); // todo better naming
-const eventChoice2 = document.getElementById('event-choice-2');
+// ======================
+// GAME STATE
+// ======================
 
-const foodDisplay = document.getElementById('food-gathered');
-const maxFoodDisplay = document.getElementById('max-food-count');
-const maxWoodDisplay = document.getElementById('max-wood-count');
-const woodDisplay = document.getElementById('wood-gathered');
-const fieldsDisplay = document.getElementById('fields-count');
-const housingDisplay = document.getElementById('housing-count');
-const shedDisplay = document.getElementById('shed-count');
-const granaryDisplay = document.getElementById('granary-count');
-const populationDisplay = document.getElementById('population-count');
-const maxPopulationDisplays = document.getElementsByClassName('max-population-count');
-const foodGainDisplay = document.getElementById('food-gain-per-tick');
-const foodLossDisplay = document.getElementById('food-loss-per-tick');
-
-const gatherFoodBtn = document.getElementById('gather-food-btn');
-const gatherWoodBtn = document.getElementById('gather-wood-btn');
-const buildFieldBtn = document.getElementById('build-field-btn');
-const buildHouseBtn = document.getElementById('build-house-btn');
-const buildShedBtn = document.getElementById('build-shed-btn');
-const buildGranaryBtn = document.getElementById('build-granary-btn');
-
-// Game State
 let gameState = createNewGameState();
 
 function createNewGameState() {
@@ -120,7 +99,9 @@ function abandonColony() {
     updateUI();
 }
 
-// Game Tick - Resource Consumption
+// ======================
+// CORE SYSTEMS (tick logic)
+// ======================
 
 function getFoodPerColonist() {
     // base consumption is 50% of a colonist
@@ -132,6 +113,9 @@ function getFoodPerColonist() {
     return Math.max(1, Math.floor(base * (1 - reduction)));
 }
 
+const getTotalFoodConsumption = () => {
+    return gameState.population.count * getFoodPerColonist();
+}
 
 function advanceEconomy() {
     // Produce food
@@ -142,12 +126,9 @@ function clampResource(resource) {
     const { count, max } = resource;
     resource.count = Math.max(0, Math.min(max, count));
 }
-function getFoodConsumption() {
-    return gameState.population.count * getFoodPerColonist();
-}
 
 const advancePopulation = () => {
-    const consumption = getFoodConsumption();
+    const consumption = getTotalFoodConsumption();
     gameState.resources.food.count -= consumption;
 
     // if excess food, chance to +1 population
@@ -195,9 +176,6 @@ function checkFoodSpoilage() {
     }
 }
 
-function triggerSpoilageEvent() {
-    console.log("Food spoilage event triggered");
-}
 
 function tick() {
     gameState.tick++
@@ -217,121 +195,18 @@ function tick() {
     saveGame();
     updateUI();
 }
+// Start the game loop
 loadGame();
 setInterval(tick, TICK_INTERVAL);
 
-// Event Listeners
 
-gatherFoodBtn.addEventListener('click', () => {
-    gameState.resources.food.count += foodPerClick;
-    saveGame();
-    updateUI();
-});
-
-document.getElementById('gather-wood-btn').addEventListener('click', () => {
-    gameState.resources.wood.count += woodPerClick;
-    saveGame();
-    updateUI();
-});
-
-buildFieldBtn.addEventListener('click', () => {
-    if (gameState.resources.wood.count >= COSTS.field) {
-        gameState.resources.wood.count -= COSTS.field;
-        gameState.buildings.fields += 1;
-        saveGame();
-        updateUI();
-    }
-});
-
-buildHouseBtn.addEventListener('click', () => {
-    if (gameState.resources.wood.count >= COSTS.house) {
-        gameState.resources.wood.count -= COSTS.house;
-        gameState.buildings.houses += 1;
-        gameState.population.max += EFFECTS.populationPerHouse;
-        saveGame();
-        updateUI();
-    }
-});
-
-buildShedBtn.addEventListener('click', () => {
-    if (gameState.resources.wood.count >= COSTS.shed) {
-        gameState.resources.wood.count -= COSTS.shed;
-        gameState.buildings.sheds += 1;
-
-        // increase storage capacity
-        gameState.resources.food.max += EFFECTS.shedStorageBonus;
-        gameState.resources.wood.max += EFFECTS.shedStorageBonus;
-        saveGame();
-        updateUI();
-    }
-});
-
-buildGranaryBtn.addEventListener('click', () => {
-    if (gameState.resources.wood.count >= GRANARY.cost) {
-        gameState.resources.wood.count -= GRANARY.cost;
-        gameState.buildings.granaries += 1;
-
-        // increase food storage capacity
-        gameState.resources.food.max += GRANARY.foodStorageBonus;
-        saveGame();
-        updateUI();
-    }
-});
-
-function updateUI() {
-    const foodPerColonist = getFoodPerColonist();
-    const foodConsumption = gameState.population.count * foodPerColonist;
-
-    foodDisplay.textContent = gameState.resources.food.count;
-    maxFoodDisplay.textContent = gameState.resources.food.max;
-    maxWoodDisplay.textContent = gameState.resources.wood.max;
-    woodDisplay.textContent = gameState.resources.wood.count;
-    fieldsDisplay.textContent = gameState.buildings.fields;
-    housingDisplay.textContent = gameState.buildings.houses;
-    shedDisplay.textContent = gameState.buildings.sheds;
-    granaryDisplay.textContent = gameState.buildings.granaries;
-    populationDisplay.textContent = gameState.population.count;
-    foodGainDisplay.textContent = gameState.buildings.fields * EFFECTS.foodPerField;
-    foodLossDisplay.textContent = foodConsumption;
-
-    for (let elem of maxPopulationDisplays) {
-        elem.textContent = gameState.population.max;
-    }
-
-    const foodSurplus = gameState.resources.food.count - foodConsumption;
-
-    // update colony status text
-    let status = "";
-    if (gameState.resources.food.count === 0) {
-        status = "The colony is starving.";
-    } else if (foodSurplus < 10*gameState.population.count) {
-        status = "The colony is surviving...just barely.";
-    } else if (foodSurplus > 0 && gameState.population.count < gameState.population.max) {
-        status = "The colony is growing (space available).";
-    } else {
-        status = "The colony is stable.";
-    }
-
-    if (gameState.resources.food.count == gameState.resources.food.max) {
-        status += " Food storage is full!";
-    }
-
-    colonyStatus.textContent = status;
-    // todo BUG : eventIsActive not updating properly
-    eventBox.style.display = gameState.events.active ? 'block' : 'none';
-    // disable buttons if not enough resources
-    buildFieldBtn.disabled = gameState.resources.wood.count < COSTS.field;
-    buildHouseBtn.disabled = gameState.resources.wood.count < COSTS.house;
-    buildShedBtn.disabled = gameState.resources.wood.count < COSTS.shed;
-    buildGranaryBtn.disabled = gameState.resources.wood.count < GRANARY.cost;
-    gatherFoodBtn.disabled = gameState.resources.food.count >= gameState.resources.food.max;
-    gatherWoodBtn.disabled = gameState.resources.wood.count >= gameState.resources.wood.max;
+// ======================
+// EVENTS SYSTEM
+// ======================
+function triggerSpoilageEvent() {
+    console.log("Food spoilage event triggered");
 }
 
-// Initial UI update
-updateUI();
-
-// Events
 function checkForEvents() {
     // guard against multiple events
     if (gameState.events.active) return;
@@ -339,12 +214,12 @@ function checkForEvents() {
     for (const event of events) {
         const lastTick = gameState.events.history[event.id] || 0;
         //console.log('checking event', event.id, 'lastTick:', lastTick, 'currentTick:', gameState.tick); 
-        if (gameState.tick - lastTick < event.cooldown)  continue; // still in cooldown
-        
+        if (gameState.tick - lastTick < event.cooldown) continue; // still in cooldown
+
         if (event.trigger()) {
             triggerEvent(event);
             console.log('event triggered', event)
-            break; 
+            break;
         }
     }
 }
@@ -453,3 +328,142 @@ const events = [
         ]
     }
 ];
+
+// ======================
+// UI + INPUT
+// ======================
+
+
+const colonyStatus = document.getElementById('colony-status');
+const eventBox = document.getElementById('event-box');
+const eventDescription = document.getElementById('event-description');
+const eventChoice1 = document.getElementById('event-choice-1'); // todo better naming
+const eventChoice2 = document.getElementById('event-choice-2');
+
+const foodDisplay = document.getElementById('food-gathered');
+const maxFoodDisplay = document.getElementById('max-food-count');
+const maxWoodDisplay = document.getElementById('max-wood-count');
+const woodDisplay = document.getElementById('wood-gathered');
+const fieldsDisplay = document.getElementById('fields-count');
+const housingDisplay = document.getElementById('housing-count');
+const shedDisplay = document.getElementById('shed-count');
+const granaryDisplay = document.getElementById('granary-count');
+const populationDisplay = document.getElementById('population-count');
+const maxPopulationDisplays = document.getElementsByClassName('max-population-count');
+const foodGainDisplay = document.getElementById('food-gain-per-tick');
+const foodLossDisplay = document.getElementById('food-loss-per-tick');
+
+const gatherFoodBtn = document.getElementById('gather-food-btn');
+const gatherWoodBtn = document.getElementById('gather-wood-btn');
+const buildFieldBtn = document.getElementById('build-field-btn');
+const buildHouseBtn = document.getElementById('build-house-btn');
+const buildShedBtn = document.getElementById('build-shed-btn');
+const buildGranaryBtn = document.getElementById('build-granary-btn');
+
+// Event Listeners
+
+gatherFoodBtn.addEventListener('click', () => {
+    gameState.resources.food.count += foodPerClick;
+    saveGame();
+    updateUI();
+});
+
+document.getElementById('gather-wood-btn').addEventListener('click', () => {
+    gameState.resources.wood.count += woodPerClick;
+    saveGame();
+    updateUI();
+});
+
+buildFieldBtn.addEventListener('click', () => {
+    if (gameState.resources.wood.count >= COSTS.field) {
+        gameState.resources.wood.count -= COSTS.field;
+        gameState.buildings.fields += 1;
+        saveGame();
+        updateUI();
+    }
+});
+
+buildHouseBtn.addEventListener('click', () => {
+    if (gameState.resources.wood.count >= COSTS.house) {
+        gameState.resources.wood.count -= COSTS.house;
+        gameState.buildings.houses += 1;
+        gameState.population.max += EFFECTS.populationPerHouse;
+        saveGame();
+        updateUI();
+    }
+});
+
+buildShedBtn.addEventListener('click', () => {
+    if (gameState.resources.wood.count >= COSTS.shed) {
+        gameState.resources.wood.count -= COSTS.shed;
+        gameState.buildings.sheds += 1;
+
+        // increase storage capacity
+        gameState.resources.food.max += EFFECTS.shedStorageBonus;
+        gameState.resources.wood.max += EFFECTS.shedStorageBonus;
+        saveGame();
+        updateUI();
+    }
+});
+
+buildGranaryBtn.addEventListener('click', () => {
+    if (gameState.resources.wood.count >= GRANARY.cost) {
+        gameState.resources.wood.count -= GRANARY.cost;
+        gameState.buildings.granaries += 1;
+
+        // increase food storage capacity
+        gameState.resources.food.max += GRANARY.foodStorageBonus;
+        saveGame();
+        updateUI();
+    }
+});
+
+function updateUI() {
+    foodDisplay.textContent = gameState.resources.food.count;
+    maxFoodDisplay.textContent = gameState.resources.food.max;
+    maxWoodDisplay.textContent = gameState.resources.wood.max;
+    woodDisplay.textContent = gameState.resources.wood.count;
+    fieldsDisplay.textContent = gameState.buildings.fields;
+    housingDisplay.textContent = gameState.buildings.houses;
+    shedDisplay.textContent = gameState.buildings.sheds;
+    granaryDisplay.textContent = gameState.buildings.granaries;
+    populationDisplay.textContent = gameState.population.count;
+    foodGainDisplay.textContent = gameState.buildings.fields * EFFECTS.foodPerField;
+    foodLossDisplay.textContent = getTotalFoodConsumption();
+
+    for (let elem of maxPopulationDisplays) {
+        elem.textContent = gameState.population.max;
+    }
+
+    const foodSurplus = gameState.resources.food.count - getTotalFoodConsumption();
+
+    // update colony status text
+    let status = "";
+    if (gameState.resources.food.count === 0) {
+        status = "The colony is starving.";
+    } else if (foodSurplus < 10*gameState.population.count) {
+        status = "The colony is surviving...just barely.";
+    } else if (foodSurplus > 0 && gameState.population.count < gameState.population.max) {
+        status = "The colony is growing (space available).";
+    } else {
+        status = "The colony is stable.";
+    }
+
+    if (gameState.resources.food.count == gameState.resources.food.max) {
+        status += " Food storage is full!";
+    }
+
+    colonyStatus.textContent = status;
+    // todo BUG : eventIsActive should be set to false if window is refreshed during event
+    eventBox.style.display = gameState.events.active ? 'block' : 'none';
+    // disable buttons if not enough resources
+    buildFieldBtn.disabled = gameState.resources.wood.count < COSTS.field;
+    buildHouseBtn.disabled = gameState.resources.wood.count < COSTS.house;
+    buildShedBtn.disabled = gameState.resources.wood.count < COSTS.shed;
+    buildGranaryBtn.disabled = gameState.resources.wood.count < GRANARY.cost;
+    gatherFoodBtn.disabled = gameState.resources.food.count >= gameState.resources.food.max;
+    gatherWoodBtn.disabled = gameState.resources.wood.count >= gameState.resources.wood.max;
+}
+
+// Initial UI update
+updateUI();
