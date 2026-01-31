@@ -19,7 +19,7 @@ A minimalist idle game about managing a growing colony with limited resources.
 
 - Status: In active development
 - Focus: Systems design, persistence, events, survival mechanics
-- Current version: v0.5
+- Current version: v0.6.1
 
 ### Tiny Pet
 A lightweight virtual pet / idle game inspired by Tamagotchi-style care mechanics.
