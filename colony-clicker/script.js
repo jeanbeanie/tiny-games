@@ -5,7 +5,7 @@
 // ======================
 
 const TICK_INTERVAL = 3000;
-const SAVE_KEY = "colonySave_v0.6";
+const SAVE_KEY = "colonySave_v0.6.2";
 
 //todo refactor costs and effects into data structures
 const COSTS = {
