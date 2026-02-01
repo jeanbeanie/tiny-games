@@ -5,23 +5,56 @@
 </head>
 <body>
     <h1>Colony Clicker <span class="version">v0.6</span></h1>
-    <div id="event-box" style="display:none;">
-        <p id="event-description"></p>
-        <button id="event-choice-1">Choice 1</button>
-        <button id="event-choice-2">Choice 2</button>
-    </div>
+
     <h3 id="colony-status">The colony is starving.</h3>
-    <p>👥 Population: <span id="population-count">0</span> / <span class="max-population-count">0</span></p>
+    <div id="info-panel">
+        <div id="resources-display">
+            <div class="resource food">
+                <span class="label">🌾 Food</span>
+                <span class="value">
+                    <span class="food-gathered"></span>
+                    <span class="divider">/</span>
+                    <span class="max-food-count"></span>
+                </span>
+            </div>
+
+            <div class="resource wood">
+                <span class="label">🪵 Wood</span>
+                <span class="value">
+                    <span class="wood-gathered"></span>
+                    <span class="divider">/</span>
+                    <span class="max-wood-count"></span>
+                </span>
+            </div>
+
+            <div class="resource population">
+                <span class="label">👥 Population</span>
+                <span class="value">
+                    <span class="population-count"></span>
+                    <span class="divider">/</span>
+                    <span class="max-population-count"></span>
+                </span>
+            </div>
+        </div>
+
+        <div id="event-box" style="display:none;">
+            <p id="event-description"></p>
+            <button id="event-choice-1">Choice 1</button>
+            <button id="event-choice-2">Choice 2</button>
+        </div>
+
+    </div>
+   
     <hr />
     <h4>Click to gather resources : </h4>
     <p>
         Food :
-        <span id="food-gathered">0</span> / <span id="max-food-count">100 </span>
+        <span class="food-gathered">0</span> / <span class="max-food-count">100 </span>
         (+<span id="food-gain-per-tick">0</span> / -<span id="food-loss-per-tick">0</span>)
         <button id="gather-food-btn">🌽 Gather Food</button>
     </p>
     <p>
-        Wood : <span id="wood-gathered">0</span> / <span id="max-wood-count">100 </span>
+        Wood : <span class="wood-gathered">0</span> / <span class="max-wood-count">100 </span>
         <button id="gather-wood-btn">🪵 Gather Wood</button>
     </p>
     <h4>Click to construct buildings : </h4>
@@ -37,7 +70,7 @@
         Shed: <span id="shed-count">0</span>
         <button title="Increases food storage by 50 and reduces food consumption by 5% per shed"
                 id="build-shed-btn">
-           🛖 Build Shed (50 wood)
+            🛖 Build Shed (50 wood)
         </button>
     </p>
     <p>
@@ -45,10 +78,10 @@
         <button title="Increases food storage by 150 and reduces food spoilage chance by 3% per granary"
                 id="build-granary-btn">
             🏺 Build Granary (90 wood)
-            </button>
-            <p><a onclick="abandonColony()" class="back-link">❌ Abandon Colony</a></p>
-            <a href="../index.html" class="back-link">← Back to Tiny Games</a>
-            <script src="script.js"></script>
+        </button>
+    <p><a onclick="abandonColony()" class="back-link">❌ Abandon Colony</a></p>
+    <a href="../index.html" class="back-link">← Back to Tiny Games</a>
+    <script src="script.js"></script>
 </body>
 
 

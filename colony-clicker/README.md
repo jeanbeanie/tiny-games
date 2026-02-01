@@ -3,9 +3,9 @@
 A minimalist idle / incremental game about growing (and sometimes losing) a small colony over time.
 
 ## Current Version
-**v0.6**
+**v0.6.2**
 
-This update focuses on core systems stability and long-term gameplay foundations.
+This update focused on the new food spoilage system and granary building, along with event persistence improvements.
 
 ## Core Features
 - Gather food and wood to keep your colony alive
@@ -14,13 +14,11 @@ This update focuses on core systems stability and long-term gameplay foundations
 - Random events with meaningful choices
 - Persistent save system (progress continues across refreshes)
 
-## New in v0.5
-- Full game-state refactor for long-term stability
-- Persistent tick-based simulation
-- Population starvation and colony failure state
-- Event cooldowns and history tracking
-- Ability to abandon and reset a colony
-- Improved save/load reliability
+## New in v0.6
+- Granary and food spoilage system
+  - Excess food can now be lost if storage is maxed out for too long
+- Event persistence across page reloads
+- Graphical improvements and UI polish
 
 ## How to Play
 - Click to gather resources

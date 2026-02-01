@@ -43,7 +43,6 @@ button {
     background-color: #2a2a2a;
     border: 1px solid #666;
     padding: 1rem;
-    margin-top: 1rem;
     border-radius: 6px;
     box-shadow: 0 0 20px rgba(0,0,0,0.6);
 }
@@ -60,6 +59,8 @@ button {
     font-size: 0.9rem;
     opacity: 0.9;
     animation: floatUp 0.6s ease-out forwards;
+    font-weight: 600;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.6);
 }
 
 @keyframes floatUp {
@@ -82,3 +83,62 @@ button {
 #colony-status {
     font-style: italic;
 }
+
+#resources-display {
+    width: 10rem;
+    margin-right: 2rem;
+
+    background-color: #262626;
+    border: 1px solid #333;
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+}
+#info-panel {
+    display: flex;
+    margin-bottom: 1.5rem;
+}
+.resource.food .value {
+    color: #c8e6a0;
+}
+
+.resource.wood .value {
+    color: #deb887;
+}
+
+.resource.population .value {
+    color: #9fd3ff;
+}
+
+.resource .value {
+    transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.resource.flash .value {
+    transform: scale(1.05);
+}
+
+.resource {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.6rem;
+}
+
+    .resource .label {
+        font-size: 0.85rem;
+        opacity: 0.85;
+    }
+
+    .resource .value {
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .resource .divider {
+        opacity: 0.4;
+        margin: 0 2px;
+    }
+
+    .resource:last-child {
+        margin-bottom: 0;
+    }

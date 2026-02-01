@@ -39,6 +39,7 @@ const GRANARY = {
 let foodPerClick = 1;
 let woodPerClick = 1;
 
+let flashedThisTick = new Set();
 
 // ======================
 // GAME STATE
@@ -125,6 +126,7 @@ const getTotalFoodConsumption = () => {
 function advanceEconomy() {
     // Produce food
     gameState.resources.food.count += gameState.buildings.fields * EFFECTS.foodPerField;
+    flashOncePerTick("food", foodDisplays[0].closest(".resource"));
     clampResource(gameState.resources.food);
 }
 function clampResource(resource) {
@@ -134,19 +136,18 @@ function clampResource(resource) {
 
 const advancePopulation = () => {
     const consumption = getTotalFoodConsumption();
-    const hasFoodSurplus = gameState.resources.food.count >= consumption;
-    const hasHousingSpace = gameState.population.count < gameState.population.max;
-
     // consume food
     gameState.resources.food.count -= consumption;
-    // why does clamping here cause gameState.resources.food.count to not update properly??
-    //clampResource(gameState.resources.food);
+    flashOncePerTick("food", foodDisplays[0].closest(".resource"));
 
-    // chance to +1 population if the conditions are right
+    const hasFoodSurplus = gameState.resources.food.count >= 0;
+    const hasHousingSpace = gameState.population.count < gameState.population.max;
+
+    // random chance to +1 population if the conditions are right
     if (hasFoodSurplus && hasHousingSpace && Math.random() < 0.3) {
         gameState.population.count++;
         setTemporaryStatus("A new colonist has joined the colony!");
-        showFeedbackTooltip(populationDisplay, "+1 👥");
+        showFeedbackTooltip(populationDisplays[0].closest(".resource"), "+1 👥");
     }
 };
 
@@ -162,7 +163,7 @@ function checkStarvation() {
         gameState.population.count--;
         gameState.population.starvationTicks = 0;
         setTemporaryStatus("A colonist has starved to death.");
-        showFeedbackTooltip(populationDisplay, "-1 💀");
+        showFeedbackTooltip(populationDisplays[0].closest(".resource"), "-1 💀");
         if (gameState.population.count <= 0) {
             abandonColony();
             alert("Your colony has fallen.");
@@ -181,15 +182,25 @@ function checkFoodSpoilage() {
         
         if (Math.random() < spoilageChance) {
             gameState.resources.food.count -= GRANARY.spoilage.lossAmount;
+            flashOncePerTick("food", foodDisplays[0].closest(".resource"));
             clampResource(gameState.resources.food);
             // refactor : event system
             triggerSpoilageEvent();
         }
     }
 }
-
+function flashResource(element) {
+    element.classList.add("flash");
+    setTimeout(() => element.classList.remove("flash"), 150);
+}
+function flashOncePerTick(resourceKey, element) {
+    if (flashedThisTick.has(resourceKey)) return;
+    flashedThisTick.add(resourceKey);
+    flashResource(element);
+}
 
 function tick() {
+    flashedThisTick.clear();
     gameState.tick++
     // todo : potentially pause while event is active
     //if (gameState.events.active) return;
@@ -215,7 +226,7 @@ function tick() {
 // ======================
 function triggerSpoilageEvent() {
     setTemporaryStatus("Some food has spoiled in storage.");
-    showFeedbackTooltip(foodDisplay, `- ${GRANARY.spoilage.lossAmount} 🌽`);
+    showFeedbackTooltip(foodDisplays[0].closest(".resource"), `- ${GRANARY.spoilage.lossAmount} 🌽`);
 }
 
 function getEventById(id) {
@@ -283,6 +294,7 @@ const events = [
                 effect() {
                     if (gameState.population.count < gameState.population.max && gameState.resources.food.count >= 10) {
                         gameState.resources.food.count -= 10;
+                        flashOncePerTick("food", foodDisplays[0].closest(".resource"));
                         gameState.population.count += 1;
                     }
                 }
@@ -369,16 +381,18 @@ const eventDescription = document.getElementById('event-description');
 const eventChoice1 = document.getElementById('event-choice-1'); // todo better naming
 const eventChoice2 = document.getElementById('event-choice-2');
 
-const foodDisplay = document.getElementById('food-gathered');
-const maxFoodDisplay = document.getElementById('max-food-count');
-const maxWoodDisplay = document.getElementById('max-wood-count');
-const woodDisplay = document.getElementById('wood-gathered');
+const foodDisplays = document.getElementsByClassName('food-gathered');
+const maxFoodDisplays = document.getElementsByClassName('max-food-count');
+const maxWoodDisplays = document.getElementsByClassName('max-wood-count');
+const woodDisplays = document.getElementsByClassName('wood-gathered');
+const populationDisplays = document.getElementsByClassName('population-count');
+const maxPopulationDisplays = document.getElementsByClassName('max-population-count');
+
 const fieldsDisplay = document.getElementById('fields-count');
 const housingDisplay = document.getElementById('housing-count');
 const shedDisplay = document.getElementById('shed-count');
 const granaryDisplay = document.getElementById('granary-count');
-const populationDisplay = document.getElementById('population-count');
-const maxPopulationDisplays = document.getElementsByClassName('max-population-count');
+
 const foodGainDisplay = document.getElementById('food-gain-per-tick');
 const foodLossDisplay = document.getElementById('food-loss-per-tick');
 
@@ -467,22 +481,27 @@ buildGranaryBtn.addEventListener('click', () => {
     }
 });
 
+function setElementsTextContent(elements, value) {
+    for (let elem of elements) {
+        elem.textContent = value;
+    }
+}
+
 function updateUI() {
-    foodDisplay.textContent = gameState.resources.food.count;
-    maxFoodDisplay.textContent = gameState.resources.food.max;
-    maxWoodDisplay.textContent = gameState.resources.wood.max;
-    woodDisplay.textContent = gameState.resources.wood.count;
+    
     fieldsDisplay.textContent = gameState.buildings.fields;
     housingDisplay.textContent = gameState.buildings.houses;
     shedDisplay.textContent = gameState.buildings.sheds;
     granaryDisplay.textContent = gameState.buildings.granaries;
-    populationDisplay.textContent = gameState.population.count;
     foodGainDisplay.textContent = gameState.buildings.fields * EFFECTS.foodPerField;
     foodLossDisplay.textContent = getTotalFoodConsumption();
 
-    for (let elem of maxPopulationDisplays) {
-        elem.textContent = gameState.population.max;
-    }
+    setElementsTextContent(foodDisplays, gameState.resources.food.count);
+    setElementsTextContent(maxFoodDisplays, gameState.resources.food.max);
+    setElementsTextContent(woodDisplays, gameState.resources.wood.count);
+    setElementsTextContent(maxWoodDisplays, gameState.resources.wood.max);
+    setElementsTextContent(populationDisplays, gameState.population.count);
+    setElementsTextContent(maxPopulationDisplays, gameState.population.max);
 
     const foodSurplus = gameState.resources.food.count - getTotalFoodConsumption();
 
