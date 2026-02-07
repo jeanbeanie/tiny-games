@@ -52,6 +52,15 @@ function createNewGameState() {
         tick: 0,
         statusMessage: null,
         statusUntilTick: 0,
+        land: {
+            total: 1000,
+            explored: 100,
+            unexplored: 900,
+
+            foodRemaining: 50,
+            woodRemaining: 100,
+            buildable: 20
+        },
         resources: {
             food: {
                 count: 0,
@@ -423,14 +432,22 @@ function showFeedbackTooltip(targetElement, text) {
 // Event Listeners
 
 gatherFoodBtn.addEventListener('click', () => {
+    if (gameState.land.foodRemaining <= 0) return;
+
     gameState.resources.food.count += foodPerClick;
+    gameState.land.foodRemaining -= foodPerClick;
+
     showFeedbackTooltip(gatherFoodBtn, `+${foodPerClick} 🌽`);
     saveGame();
     updateUI();
 });
 
 document.getElementById('gather-wood-btn').addEventListener('click', () => {
+    if (gameState.land.woodRemaining <= 0) return;
+
     gameState.resources.wood.count += woodPerClick;
+    gameState.land.woodRemaining -= woodPerClick;
+
     showFeedbackTooltip(gatherWoodBtn, `+${woodPerClick} 🪵`);
     saveGame();
     updateUI();
@@ -533,13 +550,16 @@ function updateUI() {
     }
 
     //eventBox.style.display = gameState.events.active ? 'block' : 'none';
-    // disable buttons if not enough resources
+    // disable buttons if not enough resources to build
     buildFieldBtn.disabled = gameState.resources.wood.count < COSTS.field;
     buildHouseBtn.disabled = gameState.resources.wood.count < COSTS.house;
     buildShedBtn.disabled = gameState.resources.wood.count < COSTS.shed;
     buildGranaryBtn.disabled = gameState.resources.wood.count < GRANARY.cost;
-    gatherFoodBtn.disabled = gameState.resources.food.count >= gameState.resources.food.max;
-    gatherWoodBtn.disabled = gameState.resources.wood.count >= gameState.resources.wood.max;
+    // disable gather buttons if no resources left or storage is full
+    gatherFoodBtn.disabled = gameState.land.foodRemaining <= 0
+        || gameState.resources.food.count >= gameState.resources.food.max;
+    gatherWoodBtn.disabled = gameState.land.woodRemaining <= 0
+        || gameState.resources.wood.count >= gameState.resources.wood.max;
 }
 
 // ======================
