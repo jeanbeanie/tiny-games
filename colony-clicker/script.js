@@ -437,6 +437,10 @@ gatherFoodBtn.addEventListener('click', () => {
     gameState.resources.food.count += foodPerClick;
     gameState.land.foodRemaining -= foodPerClick;
 
+    if (gameState.land.foodRemaining === 0) {
+        setTemporaryStatus("All nearby food sources have been picked clean!");
+    }
+
     showFeedbackTooltip(gatherFoodBtn, `+${foodPerClick} 🌽`);
     saveGame();
     updateUI();
@@ -447,6 +451,10 @@ document.getElementById('gather-wood-btn').addEventListener('click', () => {
 
     gameState.resources.wood.count += woodPerClick;
     gameState.land.woodRemaining -= woodPerClick;
+
+    if (gameState.land.woodRemaining === 0) {
+        setTemporaryStatus("All nearby wood sources have been picked clean!");
+    }
 
     showFeedbackTooltip(gatherWoodBtn, `+${woodPerClick} 🪵`);
     saveGame();
