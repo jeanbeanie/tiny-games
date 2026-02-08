@@ -1,11 +1,11 @@
-﻿// Version: v0.6
+﻿// Version: v0.7
 
 // ======================
 // CONFIG / CONSTANTS
 // ======================
 
 const TICK_INTERVAL = 3000;
-const SAVE_KEY = "colonySave_v0.6.2";
+const SAVE_KEY = "colonySave_v0.7";
 
 //todo refactor costs and effects into data structures
 const COSTS = {
@@ -24,8 +24,8 @@ const GRANARY = {
     cost: 90,
     foodStorageBonus: 150,
 
-    // TODO v0.7: Colonist roles may affect spoilage chance
-    // TODO v0.7: Granary workers reduce food loss instead of chance
+    // TODO v0.8: Colonist roles may affect spoilage chance
+    // TODO v0.8: Granary workers reduce food loss instead of chance
     spoilage: {
         thresholdRatio: 0.7, // % of max food when spoilage starts
         chancePerTick: 0.08, // chance of spoilage occurring per tick when above threshold
@@ -396,6 +396,8 @@ const maxWoodDisplays = document.getElementsByClassName('max-wood-count');
 const woodDisplays = document.getElementsByClassName('wood-gathered');
 const populationDisplays = document.getElementsByClassName('population-count');
 const maxPopulationDisplays = document.getElementsByClassName('max-population-count');
+const exploredLandDisplay = document.getElementById('explored-land');
+const totalLandDisplay = document.getElementById('total-land');
 
 const fieldsDisplay = document.getElementById('fields-count');
 const housingDisplay = document.getElementById('housing-count');
@@ -462,17 +464,29 @@ gatherWoodBtn.addEventListener('click', () => {
     updateUI();
 });
 
+function randomIntBetween(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 exploreLandBtn.addEventListener('click', () => {
     if (gameState.land.unexplored <= 0) return;
 
-    const discovered = 50;
+    // Future improvement: simulate biome diversity with different probabilities for food/wood/buildable land
+    //  and maybe unique events / resources for each biome
+    // Todo: limit discoverable land based on current explored land
+    const discovered = randomIntBetween(30, 80);
+    const foodFound = randomIntBetween(10, 40);
+    const woodFound = randomIntBetween(20, 60);
+    const buildableFound = randomIntBetween(2, 8);
 
     gameState.land.explored += discovered;
     gameState.land.unexplored -= discovered;
 
-    gameState.land.foodRemaining += 20;
-    gameState.land.woodRemaining += 30;
-    gameState.land.buildable += 5;
+    gameState.land.foodRemaining += foodFound;
+    gameState.land.woodRemaining += woodFound;
+    gameState.land.buildable += buildableFound;
+
+    console.log(`Discovered: ${discovered}, Food: ${foodFound}, Wood: ${woodFound}, Buildable: ${buildableFound}`);
 
     setTemporaryStatus("New land has been explored.");
     saveGame();
@@ -531,7 +545,8 @@ function setElementsTextContent(elements, value) {
 }
 
 function updateUI() {
-    
+    exploredLandDisplay.textContent = gameState.land.explored;
+    totalLandDisplay.textContent = gameState.land.total;
     fieldsDisplay.textContent = gameState.buildings.fields;
     housingDisplay.textContent = gameState.buildings.houses;
     shedDisplay.textContent = gameState.buildings.sheds;
