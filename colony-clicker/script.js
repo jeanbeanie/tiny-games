@@ -407,6 +407,7 @@ const foodLossDisplay = document.getElementById('food-loss-per-tick');
 
 const gatherFoodBtn = document.getElementById('gather-food-btn');
 const gatherWoodBtn = document.getElementById('gather-wood-btn');
+const exploreLandBtn = document.getElementById('explore-land-btn');
 const buildFieldBtn = document.getElementById('build-field-btn');
 const buildHouseBtn = document.getElementById('build-house-btn');
 const buildShedBtn = document.getElementById('build-shed-btn');
@@ -446,7 +447,7 @@ gatherFoodBtn.addEventListener('click', () => {
     updateUI();
 });
 
-document.getElementById('gather-wood-btn').addEventListener('click', () => {
+gatherWoodBtn.addEventListener('click', () => {
     if (gameState.land.woodRemaining <= 0) return;
 
     gameState.resources.wood.count += woodPerClick;
@@ -457,6 +458,23 @@ document.getElementById('gather-wood-btn').addEventListener('click', () => {
     }
 
     showFeedbackTooltip(gatherWoodBtn, `+${woodPerClick} 🪵`);
+    saveGame();
+    updateUI();
+});
+
+exploreLandBtn.addEventListener('click', () => {
+    if (gameState.land.unexplored <= 0) return;
+
+    const discovered = 50;
+
+    gameState.land.explored += discovered;
+    gameState.land.unexplored -= discovered;
+
+    gameState.land.foodRemaining += 20;
+    gameState.land.woodRemaining += 30;
+    gameState.land.buildable += 5;
+
+    setTemporaryStatus("New land has been explored.");
     saveGame();
     updateUI();
 });
