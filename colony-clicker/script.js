@@ -86,6 +86,11 @@ function createNewGameState() {
             active: null,
             history: {}, // eventID: lastTickOccurred
         },
+        workers: {
+            food: 0,
+            wood: 0,
+            explore: 0,
+        }
     }
 }
 
@@ -114,6 +119,16 @@ function abandonColony() {
 // ======================
 // CORE SYSTEMS (tick logic)
 // ======================
+
+function getAssignedWorkers() {
+    const { workers } = gameState;
+    return workers.food + workers.wood + workers.explore;
+}
+
+function getIdleWorkers() {
+    return gameState.population.count - getAssignedWorkers();
+}
+
 function setTemporaryStatus(message, durationTicks = 2) {
     gameState.statusMessage = message;
     gameState.statusUntilTick = gameState.tick + durationTicks;
@@ -132,15 +147,54 @@ const getTotalFoodConsumption = () => {
     return gameState.population.count * getFoodPerColonist();
 }
 
+function advanceWorkerGathering() {
+    const foodWorkers = gameState.workers.food;
+    const woodWorkers = gameState.workers.wood;
+
+    const foodGain = Math.min(
+        foodWorkers,
+        gameState.land.foodRemaining
+    );
+
+    const woodGain = Math.min(
+        woodWorkers,
+        gameState.land.woodRemaining
+    );
+
+    gameState.resources.food.count += foodGain;
+    gameState.resources.wood.count += woodGain;
+
+    gameState.land.foodRemaining -= foodGain;
+    gameState.land.woodRemaining -= woodGain;
+}
 function advanceEconomy() {
-    // Produce food
+    // Passively produce food
     gameState.resources.food.count += gameState.buildings.fields * EFFECTS.foodPerField;
+
+    // Workers gather resources
+    advanceWorkerGathering();
+
     flashOncePerTick("food", foodDisplays[0].closest(".resource"));
     clampResource(gameState.resources.food);
 }
 function clampResource(resource) {
     const { count, max } = resource;
     resource.count = Math.max(0, Math.min(max, count));
+}
+function advanceExploration() {
+    const explorers = gameState.workers.explore;
+    if (explorers <= 0 || gameState.land.unexplored <= 0) return;
+
+    const rawDiscoverable = explorers * randomIntBetween(5, 10);
+    // limit discoverable land to reamining unexplored land
+    const discovered = Math.min(rawDiscoverable, gameState.land.unexplored);
+
+    gameState.land.explored += discovered;
+    gameState.land.unexplored -= discovered;
+
+    gameState.land.foodRemaining += Math.floor(discovered * 0.2);
+    gameState.land.woodRemaining += Math.floor(discovered * 0.3);
+    gameState.land.buildable += Math.floor(discovered * 0.05);
 }
 
 const advancePopulation = () => {
@@ -171,8 +225,17 @@ function checkStarvation() {
     if (gameState.population.starvationTicks >= 5) {
         gameState.population.count--;
         gameState.population.starvationTicks = 0;
+
+        // unassign starved colonist from workers. his or her job is done.
+        while (getAssignedWorkers() > gameState.population.count) {
+            if (gameState.workers.explore > 0) gameState.workers.explore--;
+            else if (gameState.workers.wood > 0) gameState.workers.wood--;
+            else if (gameState.workers.food > 0) gameState.workers.food--;
+        }
+
         setTemporaryStatus("A colonist has starved to death.");
         showFeedbackTooltip(populationDisplays[0].closest(".resource"), "-1 💀");
+
         if (gameState.population.count <= 0) {
             abandonColony();
             alert("Your colony has fallen.");
@@ -406,6 +469,17 @@ const granaryDisplay = document.getElementById('granary-count');
 
 const foodGainDisplay = document.getElementById('food-gain-per-tick');
 const foodLossDisplay = document.getElementById('food-loss-per-tick');
+const foodWorkersDisplay = document.getElementById('food-workers');
+const woodWorkersDisplay = document.getElementById('wood-workers');
+const exploreWorkersDisplay = document.getElementById('explore-workers');
+const idleWorkersDisplay = document.getElementById('idle-workers');
+
+const foodPlusBtn = document.getElementById('food-plus-btn');
+const foodMinusBtn = document.getElementById('food-minus-btn');
+const woodPlusBtn = document.getElementById('wood-plus-btn');
+const woodMinusBtn = document.getElementById('wood-minus-btn');
+const explorePlusBtn = document.getElementById('explore-plus-btn');
+const exploreMinusBtn = document.getElementById('explore-minus-btn');
 
 const gatherFoodBtn = document.getElementById('gather-food-btn');
 const gatherWoodBtn = document.getElementById('gather-wood-btn');
@@ -493,6 +567,48 @@ exploreLandBtn.addEventListener('click', () => {
     updateUI();
 });
 
+foodPlusBtn.addEventListener("click", () => {
+    if (getIdleWorkers() <= 0) return;
+    gameState.workers.food++;
+    saveGame();
+    updateUI();
+});
+
+foodMinusBtn.addEventListener("click", () => {
+    if (gameState.workers.food <= 0) return;
+    gameState.workers.food--;
+    saveGame();
+    updateUI();
+});
+
+woodPlusBtn.addEventListener("click", () => {
+    if (getIdleWorkers() <= 0) return;
+    gameState.workers.wood++;
+    saveGame();
+    updateUI();
+});
+
+woodMinusBtn.addEventListener("click", () => {
+    if (gameState.workers.wood <= 0) return;
+    gameState.workers.wood--;
+    saveGame();
+    updateUI();
+});
+
+explorePlusBtn.addEventListener("click", () => {
+    if (getIdleWorkers() <= 0) return;
+    gameState.workers.explore++;
+    saveGame();
+    updateUI();
+});
+
+exploreMinusBtn.addEventListener("click", () => {
+    if (gameState.workers.explore <= 0) return;
+    gameState.workers.explore--;
+    saveGame();
+    updateUI();
+});
+
 buildFieldBtn.addEventListener('click', () => {
     if (gameState.resources.wood.count >= COSTS.field) {
         gameState.resources.wood.count -= COSTS.field;
@@ -553,6 +669,10 @@ function updateUI() {
     granaryDisplay.textContent = gameState.buildings.granaries;
     foodGainDisplay.textContent = gameState.buildings.fields * EFFECTS.foodPerField;
     foodLossDisplay.textContent = getTotalFoodConsumption();
+    foodWorkersDisplay.textContent = gameState.workers.food;
+    woodWorkersDisplay.textContent = gameState.workers.wood;
+    exploreWorkersDisplay.textContent = gameState.workers.explore;
+    idleWorkersDisplay.textContent = getIdleWorkers();
 
     setElementsTextContent(foodDisplays, gameState.resources.food.count);
     setElementsTextContent(maxFoodDisplays, gameState.resources.food.max);
@@ -590,17 +710,25 @@ function updateUI() {
         colonyStatus.textContent = status;
     }
 
-    //eventBox.style.display = gameState.events.active ? 'block' : 'none';
-    // disable buttons if not enough resources to build
+    // disable building buttons if not enough resources to construct
     buildFieldBtn.disabled = gameState.resources.wood.count < COSTS.field;
     buildHouseBtn.disabled = gameState.resources.wood.count < COSTS.house;
     buildShedBtn.disabled = gameState.resources.wood.count < COSTS.shed;
     buildGranaryBtn.disabled = gameState.resources.wood.count < GRANARY.cost;
+
     // disable gather buttons if no resources left or storage is full
     gatherFoodBtn.disabled = gameState.land.foodRemaining <= 0
         || gameState.resources.food.count >= gameState.resources.food.max;
     gatherWoodBtn.disabled = gameState.land.woodRemaining <= 0
         || gameState.resources.wood.count >= gameState.resources.wood.max;
+
+    // Disabling for worker assignment buttons
+    foodPlusBtn.disabled = getIdleWorkers() <= 0;
+    woodPlusBtn.disabled = getIdleWorkers() <= 0;
+    explorePlusBtn.disabled = getIdleWorkers() <= 0;
+    foodMinusBtn.disabled = gameState.workers.food <= 0;
+    woodMinusBtn.disabled = gameState.workers.wood <= 0;
+    exploreMinusBtn.disabled = gameState.workers.explore <= 0;
 }
 
 // ======================
