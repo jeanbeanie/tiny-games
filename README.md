@@ -16,8 +16,8 @@ Keeping development playful is what Tiny Games is all about.
 A minimalist idle game about managing a growing colony with limited resources.
 
 - Status: In active development
-- Focus: Systems design, events, survival mechanics
-- Current version: v0.7
+- Focus: Systems design, events, survival mechanics, strategy
+- Current version: v0.8
 
 ### Tiny Pet
 A lightweight virtual pet / idle game inspired by Tamagotchi-style care mechanics.

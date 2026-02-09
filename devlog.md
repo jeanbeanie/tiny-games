@@ -1,7 +1,26 @@
 # Tiny Games – Devlog
 
-## Colony Clicker v0.7 – Land and Resources are Finite Now
+## Colony Clicker v0.8 – Put Those Colonists to Work!
 **Date:** Feb 9, 2026
+
+This update added colonist assignment.
+
+#### Changes:
+- Colonist can now be assigned roles.
+  - Gatherers contribute to food and wood production each tick
+  - Explorers contribute to land exploration each tick
+- Starvation forcibly unassigns workers
+- Clicks still matter.
+
+#### Future update ideas:
+- Building construction with progress and labor requirements
+- More consequences for over expanding
+- Balance pacing
+- UI polishing
+- Save migration handling
+
+## Colony Clicker v0.7 – Land and Resources are Finite Now
+**Date:** Feb 8, 2026
 
 This update focused on expanding future gameplay by making gatherable resources limited based on the amount of land available.
 With land limits influencing total resources as well as buildable land area,
