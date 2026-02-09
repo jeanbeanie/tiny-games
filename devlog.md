@@ -1,9 +1,9 @@
 # Tiny Games – Devlog
 
 ## Colony Clicker v0.7 – Land and Resources are Finite Now
-**Date:** Jan 30, 2026
+**Date:** Feb 9, 2026
 
-This update focused on expanding future gameplay by making resources a limited based on the amount of land available.
+This update focused on expanding future gameplay by making gatherable resources limited based on the amount of land available.
 With land limits influencing total resources as well as buildable land area,
 players will need to be more strategic about how they expand and manage their colony.
 
