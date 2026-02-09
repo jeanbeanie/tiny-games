@@ -82,6 +82,8 @@ button {
 }
 #colony-status {
     font-style: italic;
+    background-color: black;
+    padding: 1rem;
 }
 
 #resources-display {
