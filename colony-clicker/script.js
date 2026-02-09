@@ -1,11 +1,11 @@
-﻿// Version: v0.7
+﻿// Version: v0.8
 
 // ======================
 // CONFIG / CONSTANTS
 // ======================
 
 const TICK_INTERVAL = 3000;
-const SAVE_KEY = "colonySave_v0.7";
+const SAVE_KEY = "colonySave_v0.8";
 
 //todo refactor costs and effects into data structures
 const COSTS = {
@@ -90,7 +90,8 @@ function createNewGameState() {
             food: 0,
             wood: 0,
             explore: 0,
-        }
+        },
+        colonistAssignmentUnlocked:false,
     }
 }
 
@@ -100,6 +101,7 @@ function saveGame() {
 }
 
 function loadGame() {
+    // TODO add migration guards for future versions
     const saved = localStorage.getItem(SAVE_KEY);
     if (!saved) return;
     try {
@@ -169,6 +171,8 @@ function advanceWorkerGathering() {
 }
 function advanceEconomy() {
     // Passively produce food
+    // TODO fields should either take food from discovered land, 
+    //or require a worker to upkeep instead of making food out of thin air
     gameState.resources.food.count += gameState.buildings.fields * EFFECTS.foodPerField;
 
     // Workers gather resources
@@ -209,6 +213,11 @@ const advancePopulation = () => {
     // random chance to +1 population if the conditions are right
     if (hasFoodSurplus && hasHousingSpace && Math.random() < 0.3) {
         gameState.population.count++;
+
+        // unlocker worker assignment when pop hits 2 for the first time
+        if (!gameState.colonistAssignmentUnlocked) {
+            gameState.colonistAssignmentUnlocked = true;
+        }
         setTemporaryStatus("A new colonist has joined the colony!");
         showFeedbackTooltip(populationDisplays[0].closest(".resource"), "+1 👥");
     }
@@ -280,6 +289,7 @@ function tick() {
    
     advancePopulation();
     advanceEconomy();
+    advanceExploration();
     checkFoodSpoilage();
     checkStarvation();
     checkForEvents();
@@ -368,6 +378,9 @@ const events = [
                         gameState.resources.food.count -= 10;
                         flashOncePerTick("food", foodDisplays[0].closest(".resource"));
                         gameState.population.count += 1;
+                        if (!gameState.colonistAssignmentUnlocked) {
+                            gameState.colonistAssignmentUnlocked = true;
+                        }
                     }
                 }
             },
@@ -452,6 +465,7 @@ const eventBox = document.getElementById('event-box');
 const eventDescription = document.getElementById('event-description');
 const eventChoice1 = document.getElementById('event-choice-1'); // todo better naming
 const eventChoice2 = document.getElementById('event-choice-2');
+const assignColonistsDiv = document.getElementById('assign-colonists-div');
 
 const foodDisplays = document.getElementsByClassName('food-gathered');
 const maxFoodDisplays = document.getElementsByClassName('max-food-count');
@@ -673,6 +687,8 @@ function updateUI() {
     woodWorkersDisplay.textContent = gameState.workers.wood;
     exploreWorkersDisplay.textContent = gameState.workers.explore;
     idleWorkersDisplay.textContent = getIdleWorkers();
+
+    assignColonistsDiv.style.display = gameState.colonistAssignmentUnlocked ? "block" : "none";
 
     setElementsTextContent(foodDisplays, gameState.resources.food.count);
     setElementsTextContent(maxFoodDisplays, gameState.resources.food.max);
