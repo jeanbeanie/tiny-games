@@ -1,11 +1,11 @@
-﻿// Version: v0.8
+﻿// Version: v0.8.3
 
 // ======================
 // CONFIG / CONSTANTS
 // ======================
 
 const TICK_INTERVAL = 3000;
-const SAVE_KEY = "colonySave_v0.8.1";
+const SAVE_KEY = "colonySave_v0.8.3";
 
 //todo refactor costs and effects into data structures
 const COSTS = {
@@ -90,6 +90,7 @@ function createNewGameState() {
             food: 0,
             wood: 0,
             explore: 0,
+            build: 0,
         },
         construction: {
             active: null // or an object when building {type:string progress:int workRequired:int}
@@ -127,7 +128,7 @@ function abandonColony() {
 
 function getAssignedWorkers() {
     const { workers } = gameState;
-    return workers.food + workers.wood + workers.explore;
+    return workers.food + workers.wood + workers.explore + workers.build;
 }
 
 function getIdleWorkers() {
@@ -230,7 +231,7 @@ function advanceConstruction() {
     const project = gameState.construction.active;
     if (!project) return;
 
-    project.progress += 1;
+    project.progress += gameState.workers.build;
 
     if (project.progress >= project.workRequired) {
         completeConstruction(project);
@@ -262,10 +263,11 @@ function checkStarvation() {
         // unassign starved colonist from workers. his or her job is done.
         while (getAssignedWorkers() > gameState.population.count) {
             if (gameState.workers.explore > 0) gameState.workers.explore--;
+            else if (gameState.workers.build > 0) gameState.workers.build--;
             else if (gameState.workers.wood > 0) gameState.workers.wood--;
             else if (gameState.workers.food > 0) gameState.workers.food--;
         }
-
+        //todo specify which colonist role died : "A woodcutter has starved to death." etc
         setTemporaryStatus("A colonist has starved to death.");
         showFeedbackTooltip(populationDisplays[0].closest(".resource"), "-1 💀");
 
@@ -511,6 +513,7 @@ const foodLossDisplay = document.getElementById('food-loss-per-tick');
 const foodWorkersDisplay = document.getElementById('food-workers');
 const woodWorkersDisplay = document.getElementById('wood-workers');
 const exploreWorkersDisplay = document.getElementById('explore-workers');
+const buildWorkersDisplay = document.getElementById('build-workers');
 const idleWorkersDisplay = document.getElementById('idle-workers');
 
 const foodPlusBtn = document.getElementById('food-plus-btn');
@@ -519,7 +522,10 @@ const woodPlusBtn = document.getElementById('wood-plus-btn');
 const woodMinusBtn = document.getElementById('wood-minus-btn');
 const explorePlusBtn = document.getElementById('explore-plus-btn');
 const exploreMinusBtn = document.getElementById('explore-minus-btn');
+const buildMinusBtn = document.getElementById('build-minus-btn');
+const buildPlusBtn = document.getElementById('build-plus-btn');
 
+const clickConstructionBtn = document.getElementById('click-construction-btn');
 const gatherFoodBtn = document.getElementById('gather-food-btn');
 const gatherWoodBtn = document.getElementById('gather-wood-btn');
 const exploreLandBtn = document.getElementById('explore-land-btn');
@@ -546,6 +552,20 @@ function showFeedbackTooltip(targetElement, text) {
 }
 
 // Event Listeners
+
+clickConstructionBtn.addEventListener('click', () => {
+    const project = gameState.construction.active;
+    if (!project) return;
+
+    project.progress += 1;
+    showFeedbackTooltip(clickConstructionBtn, "+1 🔨");
+
+    if (project.progress >= project.workRequired) {
+        completeConstruction(project);
+    }
+    saveGame();
+    updateUI();
+});
 
 gatherFoodBtn.addEventListener('click', () => {
     if (gameState.land.foodRemaining <= 0) return;
@@ -648,6 +668,21 @@ exploreMinusBtn.addEventListener("click", () => {
     updateUI();
 });
 
+buildMinusBtn.addEventListener("click", () => {
+    if (gameState.workers.build <= 0) return;
+    gameState.workers.build--;
+    saveGame();
+    updateUI();
+});
+
+buildPlusBtn.addEventListener("click", () => {
+    if (getIdleWorkers() <= 0) return;
+    gameState.workers.build++;
+    saveGame();
+    updateUI();
+});
+
+
 buildFieldBtn.addEventListener('click', () => {
     if (gameState.resources.wood.count >= COSTS.field) {
         if (gameState.construction.active) return;
@@ -722,9 +757,12 @@ function updateUI() {
     foodWorkersDisplay.textContent = gameState.workers.food;
     woodWorkersDisplay.textContent = gameState.workers.wood;
     exploreWorkersDisplay.textContent = gameState.workers.explore;
+    buildWorkersDisplay.textContent = gameState.workers.build;
     idleWorkersDisplay.textContent = getIdleWorkers();
 
+    // show/hide UI elements based on game state
     assignColonistsDiv.style.display = gameState.colonistAssignmentUnlocked ? "block" : "none";
+    clickConstructionBtn.style.display = gameState.construction.active ? "block" : "none";
 
     setElementsTextContent(foodDisplays, gameState.resources.food.count);
     setElementsTextContent(maxFoodDisplays, gameState.resources.food.max);
@@ -778,6 +816,8 @@ function updateUI() {
     foodPlusBtn.disabled = getIdleWorkers() <= 0;
     woodPlusBtn.disabled = getIdleWorkers() <= 0;
     explorePlusBtn.disabled = getIdleWorkers() <= 0;
+    buildPlusBtn.disabled = getIdleWorkers() <= 0;
+    buildMinusBtn.disabled = gameState.workers.build <= 0;
     foodMinusBtn.disabled = gameState.workers.food <= 0;
     woodMinusBtn.disabled = gameState.workers.wood <= 0;
     exploreMinusBtn.disabled = gameState.workers.explore <= 0;
