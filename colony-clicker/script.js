@@ -5,7 +5,7 @@
 // ======================
 
 const TICK_INTERVAL = 3000;
-const SAVE_KEY = "colonySave_v0.8";
+const SAVE_KEY = "colonySave_v0.8.1";
 
 //todo refactor costs and effects into data structures
 const COSTS = {
@@ -90,6 +90,9 @@ function createNewGameState() {
             food: 0,
             wood: 0,
             explore: 0,
+        },
+        construction: {
+            active: null // or an object when building {type:string progress:int workRequired:int}
         },
         colonistAssignmentUnlocked:false,
     }
@@ -223,6 +226,27 @@ const advancePopulation = () => {
     }
 };
 
+function advanceConstruction() {
+    const project = gameState.construction.active;
+    if (!project) return;
+
+    project.progress += 1;
+
+    if (project.progress >= project.workRequired) {
+        completeConstruction(project);
+    }
+}
+
+function completeConstruction(project) {
+    // todo refactor to use building data structure instead of hardcoding each type
+    if (project.type === "field") {
+        gameState.buildings.fields += 1;
+    }
+
+    gameState.construction.active = null;
+    setTemporaryStatus("Construction completed!");
+}
+
 function checkStarvation() {
     if (gameState.resources.food.count > 0) {
         gameState.population.starvationTicks = 0;
@@ -289,6 +313,7 @@ function tick() {
    
     advancePopulation();
     advanceEconomy();
+    advanceConstruction();
     advanceExploration();
     checkFoodSpoilage();
     checkStarvation();
@@ -625,8 +650,19 @@ exploreMinusBtn.addEventListener("click", () => {
 
 buildFieldBtn.addEventListener('click', () => {
     if (gameState.resources.wood.count >= COSTS.field) {
+        if (gameState.construction.active) return;
+
         gameState.resources.wood.count -= COSTS.field;
-        gameState.buildings.fields += 1;
+        gameState.land.buildable -= 1;
+        gameState.construction.active = {
+            type: "field",
+            progress: 0,
+            workRequired: 10
+        };
+
+        setTemporaryStatus("A field is under construction.");
+
+        //gameState.buildings.fields += 1;
         saveGame();
         updateUI();
     }
