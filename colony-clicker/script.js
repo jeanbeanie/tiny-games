@@ -59,7 +59,7 @@ function createNewGameState() {
 
             foodRemaining: 50,
             woodRemaining: 100,
-            buildable: 20
+            buildable: 1,
         },
         resources: {
             food: {
@@ -194,7 +194,7 @@ function advanceExploration() {
     if (explorers <= 0 || gameState.land.unexplored <= 0) return;
 
     const rawDiscoverable = explorers * randomIntBetween(5, 10);
-    // limit discoverable land to reamining unexplored land
+    // limit discoverable land to remaining unexplored land
     const discovered = Math.min(rawDiscoverable, gameState.land.unexplored);
 
     gameState.land.explored += discovered;
@@ -610,7 +610,7 @@ exploreLandBtn.addEventListener('click', () => {
     const discovered = randomIntBetween(30, 80);
     const foodFound = randomIntBetween(10, 40);
     const woodFound = randomIntBetween(20, 60);
-    const buildableFound = randomIntBetween(2, 8);
+    const buildableFound = randomIntBetween(2, 4);
 
     gameState.land.explored += discovered;
     gameState.land.unexplored -= discovered;
@@ -744,7 +744,15 @@ function setElementsTextContent(elements, value) {
         elem.textContent = value;
     }
 }
-
+function buildingShouldBeDisabled(type) {
+    const project = gameState.construction.active;
+    if (project) {
+        if (project.type === type) {
+            return true; // disable if same type is already under construction
+        }
+    }
+    return gameState.land.buildable <= 0; // no buildable land available
+}
 function updateUI() {
     exploredLandDisplay.textContent = gameState.land.explored;
     totalLandDisplay.textContent = gameState.land.total;
@@ -778,7 +786,7 @@ function updateUI() {
     let status = "";
     if (gameState.resources.food.count === 0) {
         status = "The colony is starving, we need more food!";
-    } else if (foodSurplus < 10*gameState.population.count) {
+    } else if (foodSurplus < 10 * gameState.population.count) {
         status = "The colony is surviving...just barely.";
     } else if (foodSurplus > 0 && gameState.population.count < gameState.population.max) {
         status = "The colony is thriving (space available).";
@@ -801,7 +809,7 @@ function updateUI() {
     }
 
     // disable building buttons if not enough resources to construct
-    buildFieldBtn.disabled = gameState.resources.wood.count < COSTS.field;
+    buildFieldBtn.disabled = gameState.resources.wood.count < COSTS.field || buildingShouldBeDisabled("field");
     buildHouseBtn.disabled = gameState.resources.wood.count < COSTS.house;
     buildShedBtn.disabled = gameState.resources.wood.count < COSTS.shed;
     buildGranaryBtn.disabled = gameState.resources.wood.count < GRANARY.cost;
