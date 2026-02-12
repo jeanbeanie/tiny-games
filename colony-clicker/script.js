@@ -760,7 +760,7 @@ function updateUI() {
     housingDisplay.textContent = gameState.buildings.houses;
     shedDisplay.textContent = gameState.buildings.sheds;
     granaryDisplay.textContent = gameState.buildings.granaries;
-    foodGainDisplay.textContent = gameState.buildings.fields * EFFECTS.foodPerField;
+    foodGainDisplay.textContent = gameState.workers.food + (gameState.buildings.fields * EFFECTS.foodPerField);
     foodLossDisplay.textContent = getTotalFoodConsumption();
     foodWorkersDisplay.textContent = gameState.workers.food;
     woodWorkersDisplay.textContent = gameState.workers.wood;
