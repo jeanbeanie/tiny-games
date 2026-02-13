@@ -24,8 +24,7 @@ const GRANARY = {
     cost: 90,
     foodStorageBonus: 150,
 
-    // TODO v0.8: Colonist roles may affect spoilage chance
-    // TODO v0.8: Granary workers reduce food loss instead of chance
+    // TODO v0.9: Colonist roles may affect spoilage chance
     spoilage: {
         thresholdRatio: 0.7, // % of max food when spoilage starts
         chancePerTick: 0.08, // chance of spoilage occurring per tick when above threshold
@@ -380,7 +379,8 @@ const renderActiveEvent = (event) => {
 }
 
 function resolveEventChoice(event, choiceIndex) {
-    event.choices[choiceIndex].effect();
+    const choice = event.choices[choiceIndex];
+    if (choice.requirementsMet()) { choice.effect() };
     gameState.events.active = null;
     eventBox.style.display = 'none';
     saveGame();
@@ -397,22 +397,22 @@ const events = [
         },
         text: "Hungry travelers pass by your colony. They ask you to spare some food. One wants to join your colony.",
         choices: [
-            {   // NOTE: choice should be disabled when population is full (future UX improvement)
+            { 
                 // todo allow overflow population with penalties later
                 label: "Share food and welcome them (+1 population, -10 food)",
+                requirementsMet: () => gameState.population.count < gameState.population.max && gameState.resources.food.count >= 10,
                 effect() {
-                    if (gameState.population.count < gameState.population.max && gameState.resources.food.count >= 10) {
                         gameState.resources.food.count -= 10;
                         flashOncePerTick("food", foodDisplays[0].closest(".resource"));
                         gameState.population.count += 1;
                         if (!gameState.colonistAssignmentUnlocked) {
                             gameState.colonistAssignmentUnlocked = true;
                         }
-                    }
                 }
             },
             {
                 label: "Turn them away",
+                requirementsMet: () => true,
                 effect() {
                     // nothing happens
                     // TODO maybe something bad DOES happen later. Like revenge.
@@ -431,14 +431,14 @@ const events = [
         choices: [
             {
                 label: "Spend wood to repair tools",
+                requirementsMet: () => gameState.resources.wood.count >= 10,
                 effect() {
-                    if (gameState.resources.wood.count >= 10) {
-                        gameState.resources.wood.count -= 10;
-                    }
+                        gameState.resources.wood.count -= 10;                  
                 }
             },
             {
                 label: "Ignore it",
+                requirementsMet: () => true,
                 effect() {
                     // TODO productivity penalty at a later time
                 }
@@ -456,15 +456,15 @@ const events = [
         choices: [
             {
                 label: "Use wood to smother the flames (-10 wood)",
-                effect() {
-                    if (gameState.resources.wood.count >= 10) {
-                        gameState.resources.wood.count -= 10;
-                    }
+                requirementsMet : () => gameState.resources.wood.count >= 10,
+                effect() {  
+                    gameState.resources.wood.count -= 10;
                     // todo one person has a chance to die fighting the fire
                 }
             },
             {
                 label: "Ignore it",
+                requirementsMet: () => true,
                 effect() {
                     if (gameState.buildings.sheds > 0) {
                         gameState.buildings.sheds -= 1;
@@ -806,6 +806,13 @@ function updateUI() {
     } else {
         gameState.statusMessage = null;
         colonyStatus.textContent = status;
+    }
+
+    // disable event choices if conditions not met (e.g. not enough food to share, population full)
+    if (gameState.events.active) {
+        const event = getEventById(gameState.events.active);
+        eventChoice1.disabled = !(event.choices[0].requirementsMet());
+        eventChoice2.disabled = !(event.choices[1].requirementsMet());
     }
 
     // disable building buttons if not enough resources to construct
