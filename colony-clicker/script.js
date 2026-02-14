@@ -265,6 +265,8 @@ function completeConstruction(project) {
         gameState.resources.food.max += GRANARY.foodStorageBonus;
     }
     gameState.construction.active = null;
+    // unassign all builders when construction completes
+    gameState.workers.build = 0;
     setTemporaryStatus("Construction completed!");
 }
 
@@ -710,7 +712,7 @@ buildPlusBtn.addEventListener("click", () => {
 
 buildFieldBtn.addEventListener('click', () => {
     if (gameState.resources.wood.count >= COSTS.field) {
-        if (gameState.construction.active) return;
+        if (gameState.construction.active || gameState.land.buildable <= 0) return;
 
         gameState.resources.wood.count -= COSTS.field;
         gameState.land.buildable -= 1;
@@ -727,7 +729,7 @@ buildFieldBtn.addEventListener('click', () => {
 
 buildHouseBtn.addEventListener('click', () => {
     if (gameState.resources.wood.count >= COSTS.house) {
-        if (gameState.construction.active) return;
+        if (gameState.construction.active || gameState.land.buildable <= 0) return;
 
         gameState.resources.wood.count -= COSTS.house;
         gameState.land.buildable -= 1;
@@ -744,7 +746,7 @@ buildHouseBtn.addEventListener('click', () => {
 
 buildShedBtn.addEventListener('click', () => {
     if (gameState.resources.wood.count >= COSTS.shed) {
-        if (gameState.construction.active) return;
+        if (gameState.construction.active || gameState.land.buildable <= 0) return;
 
         gameState.resources.wood.count -= COSTS.shed;
         gameState.land.buildable -= 1;
@@ -761,7 +763,7 @@ buildShedBtn.addEventListener('click', () => {
 
 buildGranaryBtn.addEventListener('click', () => {
     if (gameState.resources.wood.count >= GRANARY.cost) {
-        if (gameState.construction.active) return;
+        if (gameState.construction.active || gameState.land.buildable <= 0) return;
 
         gameState.resources.wood.count -= GRANARY.cost;
         gameState.land.buildable -= 1;

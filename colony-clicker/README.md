@@ -3,9 +3,9 @@
 A minimalist idle / incremental game about growing (and sometimes losing) a small colony over time.
 
 ## Current Version
-**v0.8**
+**v0.9**
 
-This update focused on making colonist labor a limited resource by introducing role assignment.
+This update focused on buildings, which are no longer instantly built.
 
 ## Core Features
 - Gather food and wood to keep your colony alive
@@ -15,10 +15,9 @@ This update focused on making colonist labor a limited resource by introducing r
 - Random events with meaningful choices
 - Persistent save system (progress continues across refreshes)
 
-## New in v0.8
-- Colonist can now be assigned to roles: gathering and exploring
-- Each colonist performs one action per tick based on their role
-- Idle colonists do not contribute to resource production
+## New in v0.9
+- Buildings now have build times and require colonists or manual clicks to construct
+- Building bonuses do no go into effect until construction is complete
 
 ## How to Play
 - Click to gather resources and explore new lands

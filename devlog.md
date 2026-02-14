@@ -1,5 +1,24 @@
 # Tiny Games – Devlog
 
+## Colony Clicker v0.9 – Construction Update
+**Date:** Feb 13, 2026
+
+This update added the construction of buildings.
+
+#### Changes:
+- Buildings now have build times and require colonists or manual clicks to construct
+	- Building progress is tracked and displayed in the UI
+	- One building can be under construction at a time (for now!)
+	- Bonuses do not go into effect until construction is complete
+	- buildings require adequate buildableLand, which is found by exploring land
+- Event choices are now properly disabled when requirements are not met
+- include food generated from assigned colonists in UI (food gain per tick)
+
+#### Future update ideas:
+- Minigame for exploration
+- Product made from resources (wood + food), deeper gameplay
+- Save migration coming soon ^tm
+
 ## Colony Clicker v0.8 – Put Those Colonists to Work!
 **Date:** Feb 9, 2026
 
