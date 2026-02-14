@@ -85,9 +85,12 @@ button {
     background-color: black;
     padding: 1rem;
 }
-
+#click-construction-ui {
+    margin-top: 1rem;
+}
 #resources-display {
     width: 10rem;
+    min-width: 10rem;
     margin-right: 2rem;
 
     background-color: #262626;

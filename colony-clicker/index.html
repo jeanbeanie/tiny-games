@@ -4,7 +4,7 @@
 	<link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <h1>Colony Clicker <span class="version">v0.8</span></h1>
+    <h1>Colony Clicker <span class="version">v0.9</span></h1>
 
     <h4 id="colony-status">The colony is starving.</h4>
     <div id="info-panel">
@@ -46,7 +46,10 @@
     </div>
 
     <hr />
-    <button id="click-construction-btn">🔨 Work on Construction</button>
+    <p id="click-construction-ui">
+        <button id="click-construction-btn">🔨 Work on Construction</button>
+        (<span id="construction-type">Building</span>: <span id="construction-progress">0</span> / <span id="construction-required">0</span>)
+    </p>
     <h4>Click to gather resources : </h4>
     <p>
         Food :

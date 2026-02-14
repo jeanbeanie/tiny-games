@@ -1,11 +1,11 @@
-﻿// Version: v0.8.3
+﻿// Version: v0.9
 
 // ======================
 // CONFIG / CONSTANTS
 // ======================
 
 const TICK_INTERVAL = 3000;
-const SAVE_KEY = "colonySave_v0.8.3";
+const SAVE_KEY = "colonySave_v0.9";
 
 //todo refactor costs and effects into data structures
 const COSTS = {
@@ -39,6 +39,15 @@ let foodPerClick = 1;
 let woodPerClick = 1;
 
 let flashedThisTick = new Set();
+
+function randomIntBetween(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function capitalizeFirstLetter(string) {
+    if (!string) return ""; // Handle empty or invalid input
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
 
 // ======================
 // GAME STATE
@@ -242,7 +251,19 @@ function completeConstruction(project) {
     if (project.type === "field") {
         gameState.buildings.fields += 1;
     }
-
+    else if (project.type === "house") {
+        gameState.buildings.houses += 1;
+        gameState.population.max += EFFECTS.populationPerHouse;
+    }
+    else if (project.type === "shed") {
+        gameState.buildings.sheds += 1;
+        gameState.resources.food.max += EFFECTS.shedStorageBonus;
+        gameState.resources.wood.max += EFFECTS.shedStorageBonus;
+    }
+    else if (project.type === "granary") {
+        gameState.buildings.granaries += 1;
+        gameState.resources.food.max += GRANARY.foodStorageBonus;
+    }
     gameState.construction.active = null;
     setTemporaryStatus("Construction completed!");
 }
@@ -493,6 +514,7 @@ const eventDescription = document.getElementById('event-description');
 const eventChoice1 = document.getElementById('event-choice-1'); // todo better naming
 const eventChoice2 = document.getElementById('event-choice-2');
 const assignColonistsDiv = document.getElementById('assign-colonists-div');
+const clickConstructionUI = document.getElementById('click-construction-ui');
 
 const foodDisplays = document.getElementsByClassName('food-gathered');
 const maxFoodDisplays = document.getElementsByClassName('max-food-count');
@@ -526,6 +548,10 @@ const buildMinusBtn = document.getElementById('build-minus-btn');
 const buildPlusBtn = document.getElementById('build-plus-btn');
 
 const clickConstructionBtn = document.getElementById('click-construction-btn');
+const constructionProgressDisplay = document.getElementById('construction-progress');
+const constructionTypeDisplay = document.getElementById('construction-type');
+const constructionRequiredDisplay = document.getElementById('construction-required');
+
 const gatherFoodBtn = document.getElementById('gather-food-btn');
 const gatherWoodBtn = document.getElementById('gather-wood-btn');
 const exploreLandBtn = document.getElementById('explore-land-btn');
@@ -597,17 +623,16 @@ gatherWoodBtn.addEventListener('click', () => {
     updateUI();
 });
 
-function randomIntBetween(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+
 
 exploreLandBtn.addEventListener('click', () => {
     if (gameState.land.unexplored <= 0) return;
 
     // Future improvement: simulate biome diversity with different probabilities for food/wood/buildable land
     //  and maybe unique events / resources for each biome
-    // Todo: limit discoverable land based on current explored land
-    const discovered = randomIntBetween(30, 80);
+    // Future: mini game for exploration
+    const unclampedDiscovered = randomIntBetween(30, 80);
+    const discovered = Math.min(unclampedDiscovered, gameState.land.unexplored);
     const foodFound = randomIntBetween(10, 40);
     const woodFound = randomIntBetween(20, 60);
     const buildableFound = randomIntBetween(2, 4);
@@ -694,10 +719,7 @@ buildFieldBtn.addEventListener('click', () => {
             progress: 0,
             workRequired: 10
         };
-
         setTemporaryStatus("A field is under construction.");
-
-        //gameState.buildings.fields += 1;
         saveGame();
         updateUI();
     }
@@ -705,10 +727,16 @@ buildFieldBtn.addEventListener('click', () => {
 
 buildHouseBtn.addEventListener('click', () => {
     if (gameState.resources.wood.count >= COSTS.house) {
+        if (gameState.construction.active) return;
+
         gameState.resources.wood.count -= COSTS.house;
-        gameState.buildings.houses += 1;
-        // todo create func to apply effects
-        gameState.population.max += EFFECTS.populationPerHouse;
+        gameState.land.buildable -= 1;
+        gameState.construction.active = {
+            type: "house",
+            progress: 0,
+            workRequired: 15
+        };
+        setTemporaryStatus("A house is under construction.");
         saveGame();
         updateUI();
     }
@@ -716,12 +744,16 @@ buildHouseBtn.addEventListener('click', () => {
 
 buildShedBtn.addEventListener('click', () => {
     if (gameState.resources.wood.count >= COSTS.shed) {
-        gameState.resources.wood.count -= COSTS.shed;
-        gameState.buildings.sheds += 1;
+        if (gameState.construction.active) return;
 
-        // increase storage capacity
-        gameState.resources.food.max += EFFECTS.shedStorageBonus;
-        gameState.resources.wood.max += EFFECTS.shedStorageBonus;
+        gameState.resources.wood.count -= COSTS.shed;
+        gameState.land.buildable -= 1;
+        gameState.construction.active = {
+            type: "shed",
+            progress: 0,
+            workRequired: 20
+        };
+        setTemporaryStatus("A storage shed is under construction.");
         saveGame();
         updateUI();
     }
@@ -729,11 +761,16 @@ buildShedBtn.addEventListener('click', () => {
 
 buildGranaryBtn.addEventListener('click', () => {
     if (gameState.resources.wood.count >= GRANARY.cost) {
-        gameState.resources.wood.count -= GRANARY.cost;
-        gameState.buildings.granaries += 1;
+        if (gameState.construction.active) return;
 
-        // increase food storage capacity
-        gameState.resources.food.max += GRANARY.foodStorageBonus;
+        gameState.resources.wood.count -= GRANARY.cost;
+        gameState.land.buildable -= 1;
+        gameState.construction.active = {
+            type: "granary",
+            progress: 0,
+            workRequired: 25
+        };
+        setTemporaryStatus("A granary is under construction.");
         saveGame();
         updateUI();
     }
@@ -745,15 +782,22 @@ function setElementsTextContent(elements, value) {
     }
 }
 function buildingShouldBeDisabled(type) {
+    /* todo, below is for when there is a building queue
     const project = gameState.construction.active;
     if (project) {
         if (project.type === type) {
             return true; // disable if same type is already under construction
         }
-    }
-    return gameState.land.buildable <= 0; // no buildable land available
+    }*/
+    return (gameState.land.buildable <= 0 || gameState.construction.active); // no buildable land available
 }
+
 function updateUI() {
+    const project = gameState.construction.active;
+
+    constructionTypeDisplay.textContent = project ? capitalizeFirstLetter(project.type) : "None";
+    constructionProgressDisplay.textContent = project ? project.progress : 0;
+    constructionRequiredDisplay.textContent = project ? project.workRequired : 0;
     exploredLandDisplay.textContent = gameState.land.explored;
     totalLandDisplay.textContent = gameState.land.total;
     fieldsDisplay.textContent = gameState.buildings.fields;
@@ -770,7 +814,7 @@ function updateUI() {
 
     // show/hide UI elements based on game state
     assignColonistsDiv.style.display = gameState.colonistAssignmentUnlocked ? "block" : "none";
-    clickConstructionBtn.style.display = gameState.construction.active ? "block" : "none";
+    clickConstructionUI.style.display = project ? "block" : "none";
 
     setElementsTextContent(foodDisplays, gameState.resources.food.count);
     setElementsTextContent(maxFoodDisplays, gameState.resources.food.max);
@@ -817,15 +861,16 @@ function updateUI() {
 
     // disable building buttons if not enough resources to construct
     buildFieldBtn.disabled = gameState.resources.wood.count < COSTS.field || buildingShouldBeDisabled("field");
-    buildHouseBtn.disabled = gameState.resources.wood.count < COSTS.house;
-    buildShedBtn.disabled = gameState.resources.wood.count < COSTS.shed;
-    buildGranaryBtn.disabled = gameState.resources.wood.count < GRANARY.cost;
+    buildHouseBtn.disabled = gameState.resources.wood.count < COSTS.house || buildingShouldBeDisabled("house");
+    buildShedBtn.disabled = gameState.resources.wood.count < COSTS.shed || buildingShouldBeDisabled("shed");
+    buildGranaryBtn.disabled = gameState.resources.wood.count < GRANARY.cost || buildingShouldBeDisabled("granary");
 
     // disable gather buttons if no resources left or storage is full
     gatherFoodBtn.disabled = gameState.land.foodRemaining <= 0
         || gameState.resources.food.count >= gameState.resources.food.max;
     gatherWoodBtn.disabled = gameState.land.woodRemaining <= 0
         || gameState.resources.wood.count >= gameState.resources.wood.max;
+    exploreLandBtn.disabled = gameState.land.unexplored <= 0;
 
     // Disabling for worker assignment buttons
     foodPlusBtn.disabled = getIdleWorkers() <= 0;
