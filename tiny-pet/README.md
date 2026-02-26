@@ -21,6 +21,12 @@ These stats change over time... even while you’re away. Check in, care for you
 
 This version is focusing on the feel and foundation rather than complexity.
 
+## Future Plans
+- Change name and pet design
+- Birth, growth, aging. Evolution?
+- More interaction types (e.g., grooming, training)
+- Battle system against AI pets
+
 ## Tech
 - Vanilla JavaScript
 - HTML + CSS
