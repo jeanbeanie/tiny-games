@@ -8,8 +8,6 @@ These games are intentionally simple when first released, then added to and iter
 - Small scope, big ideas
 - Minimalist, intentional design
 
-Keeping development playful is what Tiny Games is all about.
-
 ## Games
 
 ### Colony Clicker
