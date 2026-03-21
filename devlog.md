@@ -1,5 +1,23 @@
 # Tiny Games – Devlog
 
+## Tiny Pets & Colony Clicker – Upcoming Updates
+**Date:** Mar 21, 2026
+
+Notes on the next few priority updates planned across the Tiny Games projects.
+
+#### Colony Clicker:
+- Save migration handling for upcoming changes to core game structure
+- Balancing for resource gathering, event frequency, and land expansion
+- 🥳 Minigame for land exploration, adding more player agency and variety to the core loop
+
+#### Tiny Pet:
+- Rename pet
+- Simple growth system (egg, child, adult)
+- 🥳 Battle system against AI pets, potentially with a rock-paper-scissors mechanic
+
+#### General:
+- Display dev log on the Tiny Games website?
+
 ## Colony Clicker v0.9 – Construction Update
 **Date:** Feb 13, 2026
 
