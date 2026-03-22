@@ -27,6 +27,7 @@ let lastMood = null;
 
 // UI Elements
 const petNameDisplay = document.getElementById("pet-name");
+const petNameInput = document.getElementById("pet-name-input");
 const faceDisplay = document.getElementById("pet-face");
 const petMoodDisplay = document.getElementById("pet-mood");
 const petFlavorTextDisplay = document.getElementById("pet-flavor-text");
@@ -200,7 +201,32 @@ disableButtonAfterClick = (key, button, duration = 1000) => {
     }, duration);
 };
 
+function saveName() {
+    pet.name = petNameInput.value.trim() || "Noname";
+
+    petNameInput.style.display = "none";
+    petNameDisplay.style.display = "block";
+    updateUI();
+    saveGame();
+}
+
 // button handlers
+petNameDisplay.addEventListener("click", () => {
+    petNameInput.style.display = "block";
+    petNameDisplay.style.display = "none";
+
+    petNameInput.value = pet.name;
+    nameInput.focus();
+});
+
+petNameInput.addEventListener("blur", saveName);
+
+petNameInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+        saveName();
+    }
+});
+
 feedButton.addEventListener("click", () => {
     pet.stats.hunger += 15;
     pet.stats.happiness += 5;
