@@ -31,6 +31,7 @@ const petNameInput = document.getElementById("pet-name-input");
 const faceDisplay = document.getElementById("pet-face");
 const petMoodDisplay = document.getElementById("pet-mood");
 const petFlavorTextDisplay = document.getElementById("pet-flavor-text");
+const petStageDisplay = document.getElementById("pet-stage");
 const hungerBar = document.getElementById("hunger-bar");
 const happinessBar = document.getElementById("happiness-bar");
 const energyBar = document.getElementById("energy-bar");
@@ -111,6 +112,8 @@ function updateUI() {
 
     const mood = getPetMood();
     petMoodDisplay.textContent = mood;
+    petStageDisplay.textContent = getStageFlavorText(pet.stage);
+
     // only update flavor text if mood changed
     if(mood !== lastMood) {
         petFlavorTextDisplay.textContent = getPetFlavorText();
@@ -145,7 +148,7 @@ function getDefaultPetState() {
     return {
         name: "Bean",
         age: 0,
-        stahe: "egg", // egg, child, adult
+        stage: "egg", // egg, child, adult
 		stats: { // stats range from 0 to 100
             hunger: 80,     
             happiness: 80,
@@ -169,7 +172,10 @@ const DECAY_RATES = {
     happiness: 0.7,
 };
 function applyTimeEffects(elapsedMs) {
-    const minutes = elapsedMs / 60000;
+    const minutes = elapsedMs / 60000; // 5 minutes in ms
+
+    // pet ages
+    growPet();
 
 	// Stats decrease over time
 	pet.stats.hunger -= minutes * DECAY_RATES.hunger;
@@ -216,6 +222,17 @@ function getStageByAge(age) {
     if (age < 5) return "egg";
     if (age < 15) return "child";
     return "adult";
+}
+
+function growPet() {
+    pet.age += 1;
+    pet.stage = getStageByAge(pet.age);
+}
+
+function getStageFlavorText(stage) {
+    if (stage === "egg") return "🥚 Egg";
+    if (stage === "child") return "🐣 Child";
+    return "🐾 Adult";
 }
 
 // button handlers
