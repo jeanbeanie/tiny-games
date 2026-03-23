@@ -101,7 +101,7 @@ function checkGameOver() {
 }
 
 function updateUI() {
-    console.log("Pet stats:", pet.stats);
+    console.log("Pet:", pet);
     petNameDisplay.textContent = pet.name;
 
     hungerBar.style.width = pet.stats.hunger + "%";
@@ -225,8 +225,13 @@ function getStageByAge(age) {
 }
 
 function growPet() {
+    const prevStage = pet.stage
     pet.age += 1;
     pet.stage = getStageByAge(pet.age);
+
+    if (prevStage !== pet.stage) {
+        setTemporaryFlavor(`${pet.name} has grown into: ${getStageFlavorText(pet.stage)}!`, 4000);
+    }
 }
 
 function getStageFlavorText(stage) {
