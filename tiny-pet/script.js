@@ -144,6 +144,8 @@ function loadGame() {
 function getDefaultPetState() {
     return {
         name: "Bean",
+        age: 0,
+        stahe: "egg", // egg, child, adult
 		stats: { // stats range from 0 to 100
             hunger: 80,     
             happiness: 80,
@@ -208,6 +210,12 @@ function saveName() {
     petNameDisplay.style.display = "block";
     updateUI();
     saveGame();
+}
+
+function getStageByAge(age) {
+    if (age < 5) return "egg";
+    if (age < 15) return "child";
+    return "adult";
 }
 
 // button handlers
