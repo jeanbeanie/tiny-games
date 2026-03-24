@@ -1,4 +1,4 @@
-﻿// Tiny Pet v0.4
+﻿// Tiny Pet v0.5
 
 const TICK_INTERVAL = 5000; // update every 5 seconds while open
 const STORAGE_KEY = "tiny_pet_v0.3";
@@ -20,6 +20,15 @@ const MOOD_CONFIG = {
     Okay: {
         flavor: (name) => `${name} is just chillin.`,
     },
+    Lonely: {
+        flavor: (name) => `${name} looks around… like they were waiting for you.`,
+    },
+    Distant: {
+        flavor: (name) => `${name} doesn't seem as excited to see you.`,
+    },
+    Attached: {
+        flavor: (name) => `${name} lights up the moment you appear.`,
+    },
 };
 
 let pet = loadGame();
@@ -29,6 +38,7 @@ let lastMood = null;
 const petNameDisplay = document.getElementById("pet-name");
 const petNameInput = document.getElementById("pet-name-input");
 const faceDisplay = document.getElementById("pet-face");
+const bondLevelDisplay = document.getElementById("pet-bond-level");
 const petMoodDisplay = document.getElementById("pet-mood");
 const petFlavorTextDisplay = document.getElementById("pet-flavor-text");
 const petStageDisplay = document.getElementById("pet-stage");
@@ -60,6 +70,8 @@ function tick() {
 
     if (hours > 6) { // if no interaction in last 6 hours, increase neglect score
         pet.neglectScore += 1;
+        // cut care score in half if neglecting for long time
+        pet.careScore *= 0.5;
     } else { // if any interaction recently, give tiny care score boost
         pet.careScore += 0.1;
     }
@@ -67,6 +79,9 @@ function tick() {
     updateUI();
     saveGame();
     checkGameOver();
+    if (Math.random() < 0.1) { // 10% chance for random event each tick
+        triggerRandomEvent();
+    }
 }
 function initGame() {
 	// in case save file is corrupted
@@ -89,9 +104,13 @@ const returnFaceContent = () => {
     return "😊";
 };
 function getPetMood() {
+    if (pet.neglectScore > 10) return "Lonely";
+    if (pet.neglectScore > 5) return "Distant";
+
     if (pet.stats.hunger === 0 || pet.stats.happiness === 0) return "Neglected";
     if (pet.stats.energy < 20) return "Exhausted";
     if (pet.stats.hunger < 25) return "Hungry";
+    if (pet.stats.happiness > 80 && pet.careScore > 100) return "Attached";
     if (pet.stats.happiness > 80) return "Happy";
     return "Okay";
 }
@@ -102,9 +121,10 @@ function getPetFlavorText() {
 }
 
 function checkGameOver() {
-    const zeroStats = Object.values(pet.stats).filter(v => v === 0).length;
-    if (zeroStats >= 2) {
-        alert(`${pet.name} feels too neglected and wanders off...`);
+    //const zeroStats = Object.values(pet.stats).filter(v => v === 0).length;
+    //if (zeroStats >= 2) {
+    if (pet.neglectScore > 20) {
+        alert(`${pet.name} waited and waited...but eventually it wandered away.`);
         resetPet();
     }
 }
@@ -118,6 +138,7 @@ function updateUI() {
     energyBar.style.width = pet.stats.energy + "%";
 
     faceDisplay.textContent = returnFaceContent();
+    bondLevelDisplay.textContent = `Bond: ${Math.floor(pet.careScore - pet.neglectScore)}`;
 
     const mood = getPetMood();
     petMoodDisplay.textContent = mood;
@@ -242,7 +263,8 @@ function growPet() {
     pet.stage = getStageByAge(pet.age);
 
     if (prevStage !== pet.stage) {
-        setTemporaryFlavor(`${pet.name} has grown into: ${getStageFlavorText(pet.stage)}!`, 4000);
+        setTemporaryFlavor(`${pet.name} grew into ${getStageFlavorText(pet.stage)}...they seem different`, 5000);
+        pet.careScore += 5; // bonding boost for growing up
     }
 }
 
@@ -255,6 +277,20 @@ function getStageFlavorText(stage) {
 function handleInteraction() {
     pet.lastInteractionAt = Date.now();
     pet.careScore += 1;
+}
+
+function triggerRandomEvent() {
+    const events = [
+        `${pet.name} attempts a clumsy front flip.`,
+        `${pet.name} stares intently at something invisible.`,
+        `${pet.name} sneezes and wiggles its nose.`,
+        `${pet.name} looks around curiously.`,
+        `${pet.name} scratches behind its ear.`,
+        `${pet.name} seems to be entertained by its own shadow.`,
+    ];
+
+    const event = events[Math.floor(Math.random() * events.length)];
+    setTemporaryFlavor(event, 4000);
 }
 
 // button handlers
