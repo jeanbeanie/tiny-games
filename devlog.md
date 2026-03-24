@@ -1,5 +1,16 @@
 # Tiny Games – Devlog
 
+## Tiny Pets v0.5 - Care and Neglect Update
+**Date:** Mar 24, 2026
+
+I wanted the pet to feel like more than just a set of stats, and to have more meaningful consequences depending on how you care for it (or don’t).
+
+#### Changes:
+- Added a new "Care/Neglect" stat that tracks how well the pet is cared for
+- Interactions increase care score, while not interacting for many hours increase neglect score
+- Show bonding level based on care, which can influence pet moods and interactions
+- Neglect is the main way to lose your pet now, rather than just low hunger or happiness
+
 ## Tiny Pets & Colony Clicker – Upcoming Updates
 **Date:** Mar 21, 2026
 

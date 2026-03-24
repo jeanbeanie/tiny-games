@@ -4,7 +4,7 @@ Tiny Games is a collection of small but fun, experimental web games.
 
 These games are intentionally simple when first released, then added to and iterated over time as a creative outlet of mine.
 
-## Philosophy
+### Philosophy
 - Small scope, big ideas
 - Minimalist, intentional design
 
@@ -22,7 +22,7 @@ A lightweight virtual pet / idle game inspired by Tamagotchi-style care mechanic
 
 - Status: In active development
 - Focus: Time-based simulation
-- Current version: v0.3
+- Current version: v0.5
 
 ## Tech
 - Plain HTML, CSS, and JavaScript
