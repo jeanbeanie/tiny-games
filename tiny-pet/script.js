@@ -1,4 +1,4 @@
-﻿// Tiny Pet v0.3
+﻿// Tiny Pet v0.4
 
 const TICK_INTERVAL = 5000; // update every 5 seconds while open
 const STORAGE_KEY = "tiny_pet_v0.3";
@@ -54,6 +54,15 @@ function tick() {
 
     applyTimeEffects(elapsed);
     pet.lastUpdatedAt = now;
+    const timeSinceLastInteraction = now - pet.lastInteractionAt;
+    // hours since last interaction
+    const hours = timeSinceLastInteraction / (1000 * 60 * 60);
+
+    if (hours > 6) { // if no interaction in last 6 hours, increase neglect score
+        pet.neglectScore += 1;
+    } else { // if any interaction recently, give tiny care score boost
+        pet.careScore += 0.1;
+    }
 
     updateUI();
     saveGame();
@@ -155,6 +164,9 @@ function getDefaultPetState() {
             energy: 80,
         },
         lastUpdatedAt: Date.now(),
+        careScore: 0,
+        neglectScore: 0,
+        lastInteractionAt: Date.now(),
     };
 }
 
@@ -240,6 +252,11 @@ function getStageFlavorText(stage) {
     return "🐾 Adult";
 }
 
+function handleInteraction() {
+    pet.lastInteractionAt = Date.now();
+    pet.careScore += 1;
+}
+
 // button handlers
 petNameDisplay.addEventListener("click", () => {
     petNameInput.style.display = "block";
@@ -262,6 +279,7 @@ feedButton.addEventListener("click", () => {
     pet.stats.happiness += 5;
 
     clampStats();
+    handleInteraction();
     disableButtonAfterClick("feed", feedButton);
     setTemporaryFlavor(`${pet.name} happily munches on the mango.`);
     updateUI();
@@ -274,6 +292,7 @@ playButton.addEventListener("click", () => {
     pet.stats.happiness += 15;
 
     clampStats();
+    handleInteraction();
     disableButtonAfterClick("play", playButton);
     setTemporaryFlavor(`${pet.name} plays enthusiastically.`);
     updateUI();
@@ -285,6 +304,7 @@ sleepButton.addEventListener("click", () => {
     pet.stats.happiness += 5;
 
     clampStats();
+    handleInteraction();
     disableButtonAfterClick("sleep", sleepButton);
     setTemporaryFlavor(`${pet.name} blinks and starts gently snoring.`);
     updateUI();
