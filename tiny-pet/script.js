@@ -1,7 +1,7 @@
 ﻿// Tiny Pet v0.5
 
 const TICK_INTERVAL = 5000; // update every 5 seconds while open
-const STORAGE_KEY = "tiny_pet_v0.3";
+const STORAGE_KEY = "tiny_pet_v0.5";
 const MAX_ELAPSED_MS = 1000 * 60 * 60 * 24; // 24 hours
 
 const MOOD_CONFIG = {
@@ -252,8 +252,8 @@ function saveName() {
 }
 
 function getStageByAge(age) {
-    if (age < 5) return "egg";
-    if (age < 15) return "child";
+    if (age < 50) return "egg";
+    if (age < 150) return "child";
     return "adult";
 }
 
@@ -299,7 +299,7 @@ petNameDisplay.addEventListener("click", () => {
     petNameDisplay.style.display = "none";
 
     petNameInput.value = pet.name;
-    nameInput.focus();
+    petNameInput.focus();
 });
 
 petNameInput.addEventListener("blur", saveName);
