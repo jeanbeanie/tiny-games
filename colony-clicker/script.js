@@ -123,11 +123,27 @@ function loadGame() {
     }
 }
 
-function abandonColony() {
+function scrollToTop() {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "smooth",
+    });
+}
+
+function resetColony() {
     localStorage.removeItem(SAVE_KEY);
+    eventBox.style.display = 'none';
     gameState = createNewGameState();
     saveGame();
     updateUI();
+    setTimeout(scrollToTop, 0);
+}
+
+function abandonColony() {
+  if(confirm('Are you really sure you want to abandon your colony?')){
+    resetColony();
+  }
 }
 
 // ======================
@@ -294,8 +310,8 @@ function checkStarvation() {
         showFeedbackTooltip(populationDisplays[0].closest(".resource"), "-1 💀");
 
         if (gameState.population.count <= 0) {
-            abandonColony();
             alert("Your colony has fallen.");
+            resetColony();
         }
     }
 }
