@@ -55,6 +55,7 @@ function capitalizeFirstLetter(string) {
 
 let gameState = createNewGameState();
 
+// todo: difficulty casual/hardcore...
 function createNewGameState() {
     return {
         tick: 0,
@@ -71,12 +72,12 @@ function createNewGameState() {
         },
         resources: {
             food: {
-                count: 0,
-                max: 100, // todo calculate based on buildings
+                count: 15, //
+                max: 100,
             },
             wood: {
-                count: 0,
-                max: 100, // todo calculate based on buildings
+                count: 5,
+                max: 100,
             },
         },
         buildings: {
@@ -595,6 +596,22 @@ function showFeedbackTooltip(targetElement, text) {
     }, 600);
 }
 
+
+const buttonCooldowns = {
+  exploreLand: false,
+  gatherWood: false,
+  workOnConstruction: false,
+};
+
+disableButtonAfterClick = (key, button, duration = 1000) => {
+    buttonCooldowns[key] = true;
+    button.disabled = true;
+    setTimeout(() => {
+        buttonCooldowns[key] = false;
+        updateUI(); // re-evaluate button states
+    }, duration);
+};
+
 // Event Listeners
 
 clickConstructionBtn.addEventListener('click', () => {
@@ -607,6 +624,8 @@ clickConstructionBtn.addEventListener('click', () => {
     if (project.progress >= project.workRequired) {
         completeConstruction(project);
     }
+
+    disableButtonAfterClick("workOnConstruction", clickConstructionBtn, 4000);
     saveGame();
     updateUI();
 });
@@ -636,6 +655,7 @@ gatherWoodBtn.addEventListener('click', () => {
         setTemporaryStatus("All nearby wood sources have been picked clean!");
     }
 
+    disableButtonAfterClick("gatherWood", gatherWoodBtn, 5000);
     showFeedbackTooltip(gatherWoodBtn, `+${woodPerClick} 🪵`);
     saveGame();
     updateUI();
@@ -664,6 +684,7 @@ exploreLandBtn.addEventListener('click', () => {
 
     console.log(`Discovered: ${discovered}, Food: ${foodFound}, Wood: ${woodFound}, Buildable: ${buildableFound}`);
 
+    disableButtonAfterClick("exploreLand", exploreLandBtn, 20000);
     setTemporaryStatus("New land has been explored.");
     saveGame();
     updateUI();
@@ -887,8 +908,9 @@ function updateUI() {
     gatherFoodBtn.disabled = gameState.land.foodRemaining <= 0
         || gameState.resources.food.count >= gameState.resources.food.max;
     gatherWoodBtn.disabled = gameState.land.woodRemaining <= 0
-        || gameState.resources.wood.count >= gameState.resources.wood.max;
-    exploreLandBtn.disabled = gameState.land.unexplored <= 0;
+        || gameState.resources.wood.count >= gameState.resources.wood.max
+        ||  buttonCooldowns.gatherWood;
+    exploreLandBtn.disabled = buttonCooldowns.exploreLand ||  gameState.land.unexplored <= 0;
 
     // Disabling for worker assignment buttons
     foodPlusBtn.disabled = getIdleWorkers() <= 0;
