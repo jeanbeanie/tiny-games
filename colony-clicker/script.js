@@ -911,6 +911,9 @@ function updateUI() {
         || gameState.resources.wood.count >= gameState.resources.wood.max
         ||  buttonCooldowns.gatherWood;
     exploreLandBtn.disabled = buttonCooldowns.exploreLand ||  gameState.land.unexplored <= 0;
+    
+    // check work on construction button cooldown
+    clickConstructionBtn.disabled = buttonCooldowns.workOnConstruction;
 
     // Disabling for worker assignment buttons
     foodPlusBtn.disabled = getIdleWorkers() <= 0;
