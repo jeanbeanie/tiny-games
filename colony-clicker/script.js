@@ -372,6 +372,29 @@ function tick() {
 // ======================
 // EVENTS SYSTEM
 // ======================
+
+// global state for active event timeout
+let activeEventTimeout = null;
+
+function clearEventTimeout() {
+  if (activeEventTimeout != null){
+    clearTimeout(activeEventTimeout);
+    activeEventTimeout = null;
+  }
+}
+
+function autoResolveEvent(event) {
+  const validDefaultChoice =  
+    typeof event.autoResolveChoice === "number"
+    && event.autoResolveChoice < event.choices.length;
+
+  // Default to last choice if not specified or valid
+  const defaultIndex = validDefaultChoice ? 
+    event.autoResolveChoice : (event.choices.length - 1);
+
+  resolveEventChoice(event, defaultIndex);
+}
+
 function triggerSpoilageEvent() {
     setTemporaryStatus("Some food has spoiled in storage.");
     showFeedbackTooltip(foodDisplays[0].closest(".resource"), `- ${GRANARY.spoilage.lossAmount} 🌽`);
@@ -409,16 +432,27 @@ const renderActiveEvent = (event) => {
     eventDescription.textContent = event.text;
     eventChoice1.textContent = event.choices[0].label;
     eventChoice1.onclick = () => {
+        clearEventTimeout();
         resolveEventChoice(event, 0);
     };
     eventChoice2.textContent = event.choices[1].label;
     eventChoice2.onclick = () => {
+        clearEventTimeout();
         resolveEventChoice(event, 1);
     };
     eventBox.style.display = 'block';
+
+    clearEventTimeout(); // clear previous timeout if any
+    
+    // 15 second default event duration
+    const duration = event.autoResolveDuration || 15000;
+    activeEventTimeout = setTimeout(() => {
+      autoResolveEvent(event);
+    }, duration);
 }
 
 function resolveEventChoice(event, choiceIndex) {
+    clearEventTimeout();
     const choice = event.choices[choiceIndex];
     if (choice.requirementsMet()) { choice.effect() };
     gameState.events.active = null;
@@ -430,11 +464,13 @@ function resolveEventChoice(event, choiceIndex) {
 const events = [
     {
         id: "hungry_travelers",
-        cooldown: 40,
+        cooldown: 60,
         trigger() {
             return gameState.resources.food.count > 20 &&
-                Math.random() < 0.05;
+                Math.random() < 0.03;
         },
+        autoResolveDuration: 15000, // close after 15 secs
+        autoResolveChoice: 1,
         text: "Hungry travelers pass by your colony. They ask you to spare some food. One wants to join your colony.",
         choices: [
             { 
@@ -465,7 +501,7 @@ const events = [
         cooldown: 50,
         trigger() {
             return gameState.resources.wood.count > 20 &&
-                Math.random() < 0.05;
+                Math.random() < 0.03;
         },
         text: "Your gathering tools are wearing down. Productivity will suffer if they're not replaced.",
         choices: [
@@ -490,7 +526,7 @@ const events = [
         cooldown: 30,
         trigger() {
             return gameState.buildings.sheds >= 1 &&
-                Math.random() < 0.05;
+                Math.random() < 0.03;
         },
         text: "A small fire breaks out near a storage shed!",
         choices: [
