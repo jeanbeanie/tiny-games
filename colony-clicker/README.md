@@ -3,9 +3,9 @@
 A minimalist idle / incremental game about growing (and sometimes losing) a small colony over time.
 
 ## Current Version
-**v0.9**
+**v0.9.1**
 
-This update focused on buildings, which are no longer instantly built.
+The latest major update focused on buildings, which are no longer instantly built.
 
 ## Core Features
 - Gather food and wood to keep your colony alive

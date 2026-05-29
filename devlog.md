@@ -1,5 +1,19 @@
 # Tiny Games – Devlog
 
+## Colony Clicker v0.9.1 - Events/Buttons Cooldowns
+**Date:** May 29, 2026
+
+Adding cooldowns to a few select buttons, like the wood gather and construction buttons, have given a better
+sense of pacing to the game. Starting a fresh run with a few food and wood resource makes the colony
+feel a little less on the brink of immediate death upon arrival. The exploration button sees the biggest
+impact on gameplay by not allowing the player to spam more land and resources, one of the current main
+pacing tools of the game.
+
+#### Changes:
+- Gather Wood, Work on Construction, and Explore Land have set cooldowns
+- Events expire after 15 seconds by default
+- New games start with a small amount of food and wood
+
 ## Tiny Pets v0.5 - Care and Neglect Update
 **Date:** Mar 24, 2026
 
