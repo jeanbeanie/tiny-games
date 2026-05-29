@@ -625,7 +625,7 @@ clickConstructionBtn.addEventListener('click', () => {
         completeConstruction(project);
     }
 
-    disableButtonAfterClick("workOnConstruction", clickConstructionBtn, 4000);
+    disableButtonAfterClick("workOnConstruction", clickConstructionBtn, 3000);
     saveGame();
     updateUI();
 });
@@ -655,7 +655,7 @@ gatherWoodBtn.addEventListener('click', () => {
         setTemporaryStatus("All nearby wood sources have been picked clean!");
     }
 
-    disableButtonAfterClick("gatherWood", gatherWoodBtn, 5000);
+    disableButtonAfterClick("gatherWood", gatherWoodBtn, 1000);
     showFeedbackTooltip(gatherWoodBtn, `+${woodPerClick} 🪵`);
     saveGame();
     updateUI();
