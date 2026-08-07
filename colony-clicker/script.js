@@ -642,7 +642,7 @@ const buttonCooldowns = {
   workOnConstruction: false,
 };
 
-disableButtonAfterClick = (key, button, duration = 1000) => {
+const disableButtonAfterClick = (key, button, duration = 1000) => {
     buttonCooldowns[key] = true;
     button.disabled = true;
     setTimeout(() => {
@@ -720,8 +720,6 @@ exploreLandBtn.addEventListener('click', () => {
     gameState.land.foodRemaining += foodFound;
     gameState.land.woodRemaining += woodFound;
     gameState.land.buildable += buildableFound;
-
-    console.log(`Discovered: ${discovered}, Food: ${foodFound}, Wood: ${woodFound}, Buildable: ${buildableFound}`);
 
     disableButtonAfterClick("exploreLand", exploreLandBtn, 20000);
     setTemporaryStatus("New land has been explored.");
