@@ -121,8 +121,6 @@ function getPetFlavorText() {
 }
 
 function checkGameOver() {
-    //const zeroStats = Object.values(pet.stats).filter(v => v === 0).length;
-    //if (zeroStats >= 2) {
     if (pet.neglectScore > 20) {
         alert(`${pet.name} waited and waited...but eventually it wandered away.`);
         resetPet();
@@ -130,7 +128,6 @@ function checkGameOver() {
 }
 
 function updateUI() {
-    console.log("Pet:", pet);
     petNameDisplay.textContent = pet.name;
 
     hungerBar.style.width = pet.stats.hunger + "%";
@@ -205,7 +202,7 @@ const DECAY_RATES = {
     happiness: 0.7,
 };
 function applyTimeEffects(elapsedMs) {
-    const minutes = elapsedMs / 60000; // 5 minutes in ms
+    const minutes = elapsedMs / 60000; // 60000ms = 1 minute
 
     // pet ages
     growPet();
@@ -232,7 +229,7 @@ const buttonCooldowns = {
     sleep: false,
 };
 
-disableButtonAfterClick = (key, button, duration = 1000) => {
+const disableButtonAfterClick = (key, button, duration = 1000) => {
     buttonCooldowns[key] = true;
     button.disabled = true;
 
