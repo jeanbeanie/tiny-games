@@ -166,16 +166,16 @@ function setTemporaryStatus(message, durationTicks = 2) {
 }
 function getFoodPerColonist() {
     // base consumption is 50% of a colonist
-    const base = Math.ceil(gameState.population.count * 0.5);
+    const base = 0.5;
 
     // sheds reduce food consumption by 5% each
     // todo cap reduction
     const reduction = gameState.buildings.sheds * 0.05;
-    return Math.max(1, Math.floor(base * (1 - reduction)));
+    return Math.max(0.1, base * (1 - reduction));
 }
 
 const getTotalFoodConsumption = () => {
-    return gameState.population.count * getFoodPerColonist();
+    return Math.max(1, Math.ceil(gameState.population.count * getFoodPerColonist()));
 }
 
 function advanceWorkerGathering() {
@@ -562,6 +562,9 @@ const events = [
 // UI + INPUT
 // ======================
 
+// Everything below touches the DOM, so it's skipped when script.js is
+// loaded in a non-browser environment (e.g. `require`d from a Node test).
+if (typeof document !== "undefined") {
 
 const colonyStatus = document.getElementById('colony-status');
 const eventBox = document.getElementById('event-box');
@@ -980,3 +983,10 @@ setInterval(tick, TICK_INTERVAL);
 
 // Initial UI update
 updateUI();
+
+} // end of typeof document !== "undefined" guard
+
+// Exposed for script.test.js; no-op in the browser (module is undefined there).
+if (typeof module !== "undefined" && module.exports) {
+    module.exports = { getTotalFoodConsumption, getFoodPerColonist, gameState };
+}
