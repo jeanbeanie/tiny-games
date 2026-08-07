@@ -1,11 +1,11 @@
-﻿// Version: v0.9
+﻿// Version: v0.10
 
 // ======================
 // CONFIG / CONSTANTS
 // ======================
 
 const TICK_INTERVAL = 3000;
-const SAVE_KEY = "colonySave_v0.9";
+const SAVE_KEY = "colonySave_v0.10";
 
 //todo refactor costs and effects into data structures
 const COSTS = {

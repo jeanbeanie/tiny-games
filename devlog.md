@@ -1,5 +1,16 @@
 # Tiny Games – Devlog
 
+## Colony Clicker v0.10 - Bug Fix & Cleanup
+**Date:** August 7, 2026
+
+Found and fixed a food consumption bug that was scaling quadratically with population instead of linearly, meaning colonies became unsustainable once they grew past a handful of colonists no matter how well they were managed. Also cleaned up some markup and code issues along the way.
+
+#### Changes:
+- Fixed food consumption scaling quadratically with population instead of linearly
+- Added a small test suite covering the food consumption formula
+- Fixed invalid HTML (missing doctype/charset/lang, an unclosed tag)
+- Removed a leftover debug console.log and an implicit global variable
+
 ## Colony Clicker v0.9.1 - Events/Buttons Cooldowns
 **Date:** May 29, 2026
 

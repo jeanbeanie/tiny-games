@@ -3,9 +3,9 @@
 A minimalist idle / incremental game about growing (and sometimes losing) a small colony over time.
 
 ## Current Version
-**v0.9.1**
+**v0.10**
 
-The latest major update focused on buildings, which are no longer instantly built.
+The latest update fixes a food consumption bug and cleans up some HTML/JS issues.
 
 ## Core Features
 - Gather food and wood to keep your colony alive
@@ -14,10 +14,6 @@ The latest major update focused on buildings, which are no longer instantly buil
 - Manage population growth, colonist assignment, starvation, food spoilage, and more
 - Random events with meaningful choices
 - Persistent save system (progress continues across refreshes)
-
-## New in v0.9
-- Buildings now have build times and require colonists or manual clicks to construct
-- Building bonuses do no go into effect until construction is complete
 
 ## How to Play
 - Click to gather resources and explore new lands
