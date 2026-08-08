@@ -156,11 +156,20 @@ function updateUI() {
 
 // Save and load pet state
 function saveGame() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(pet));
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(pet));
+    } catch {
+        // storage unavailable or full; skip saving for now
+    }
 }
 
 function loadGame() {
-    const saved = localStorage.getItem(STORAGE_KEY);
+    let saved;
+    try {
+        saved = localStorage.getItem(STORAGE_KEY);
+    } catch {
+        return getDefaultPetState();
+    }
     if (!saved) return getDefaultPetState();
 
     try {
