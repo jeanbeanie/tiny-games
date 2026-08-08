@@ -49,6 +49,7 @@ const energyBar = document.getElementById("energy-bar");
 const feedButton = document.getElementById("feed-btn");
 const playButton = document.getElementById("play-btn");
 const sleepButton = document.getElementById("sleep-btn");
+const resetPetLink = document.getElementById("reset-pet-link");
 
 
 function resetPet() {
@@ -291,6 +292,8 @@ function triggerRandomEvent() {
 }
 
 // button handlers
+resetPetLink.addEventListener("click", resetPet);
+
 petNameDisplay.addEventListener("click", () => {
     petNameInput.style.display = "block";
     petNameDisplay.style.display = "none";
