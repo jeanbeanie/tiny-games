@@ -8,6 +8,12 @@ const MAX_ELAPSED_MS = 1000 * 60 * 60 * 24; // 24 hours
 const CHILD_AGE_MINUTES = 180; // 3 hours
 const ADULT_AGE_MINUTES = 1440; // 24 hours
 
+// neglect is derived live from time since last interaction, not stored/accumulated
+const NEGLECT_GRACE_HOURS = 6; // no penalty within this window
+const NEGLECT_GAME_OVER_HOURS = 24; // hours past the grace period before the pet is lost
+const RECOVERY_WINDOW_HOURS = 24; // time for neglect to fully ease off once you're back
+const CARE_RATE_PER_MINUTE = 1.2; // bonding trickle while not neglected
+
 const MOOD_CONFIG = {
     Neglected: {
         flavor: (name) => `${name} is in desperate need of care.`,
@@ -69,16 +75,13 @@ function tick() {
 
     applyTimeEffects(elapsed);
     pet.lastUpdatedAt = now;
-    const timeSinceLastInteraction = now - pet.lastInteractionAt;
-    // hours since last interaction
-    const hours = timeSinceLastInteraction / (1000 * 60 * 60);
 
-    if (hours > 6) { // if no interaction in last 6 hours, increase neglect score
-        pet.neglectScore += 1;
-        // cut care score in half if neglecting for long time
-        pet.careScore *= 0.5;
-    } else { // if any interaction recently, give tiny care score boost
-        pet.careScore += 0.1;
+    // small bonding trickle while you're within the grace window; checked directly against
+    // the interaction time rather than getNeglectHours(), since that can stay above 0 for a
+    // while after you interact if it's still fading out from an earlier stretch of neglect
+    const hoursSinceInteraction = (now - pet.lastInteractionAt) / (1000 * 60 * 60);
+    if (hoursSinceInteraction <= NEGLECT_GRACE_HOURS) {
+        pet.careScore += (elapsed / 60000) * CARE_RATE_PER_MINUTE;
     }
 
     updateUI();
@@ -108,9 +111,22 @@ const returnFaceContent = () => {
 
     return "😊";
 };
+function getNeglectHours() {
+    const hoursSinceInteraction = (Date.now() - pet.lastInteractionAt) / (1000 * 60 * 60);
+
+    // the neglect present when you last checked in fades out over the recovery window...
+    const recoveryProgress = Math.min(1, hoursSinceInteraction / RECOVERY_WINDOW_HOURS);
+    const fadingResidual = pet.neglectAtLastInteraction * (1 - recoveryProgress);
+
+    // ...while fresh neglect starts building again once the grace period passes
+    const freshNeglect = Math.max(0, hoursSinceInteraction - NEGLECT_GRACE_HOURS);
+
+    return Math.max(fadingResidual, freshNeglect);
+}
+
 function getPetMood() {
-    if (pet.neglectScore > 10) return "Lonely";
-    if (pet.neglectScore > 5) return "Distant";
+    if (getNeglectHours() > 12) return "Lonely";
+    if (getNeglectHours() > 6) return "Distant";
 
     if (pet.stats.hunger === 0 || pet.stats.happiness === 0) return "Neglected";
     if (pet.stats.energy < 20) return "Exhausted";
@@ -126,7 +142,7 @@ function getPetFlavorText() {
 }
 
 function checkGameOver() {
-    if (pet.neglectScore > 20) {
+    if (getNeglectHours() > NEGLECT_GAME_OVER_HOURS) {
         alert(`${pet.name} waited and waited...but eventually it wandered away.`);
         resetPet();
     }
@@ -140,7 +156,7 @@ function updateUI() {
     energyBar.style.width = pet.stats.energy + "%";
 
     faceDisplay.textContent = returnFaceContent();
-    bondLevelDisplay.textContent = `Bond: ${Math.floor(pet.careScore - pet.neglectScore)}`;
+    bondLevelDisplay.textContent = `Bond: ${Math.floor(pet.careScore - getNeglectHours())}`;
 
     const mood = getPetMood();
     petMoodDisplay.textContent = mood;
@@ -197,8 +213,8 @@ function getDefaultPetState() {
         },
         lastUpdatedAt: Date.now(),
         careScore: 0,
-        neglectScore: 0,
         lastInteractionAt: Date.now(),
+        neglectAtLastInteraction: 0,
     };
 }
 
@@ -286,6 +302,8 @@ function getStageFlavorText(stage) {
 }
 
 function handleInteraction() {
+    // grab this now, before lastInteractionAt (which it depends on) gets reset below
+    pet.neglectAtLastInteraction = getNeglectHours();
     pet.lastInteractionAt = Date.now();
     pet.careScore += 1;
 }
