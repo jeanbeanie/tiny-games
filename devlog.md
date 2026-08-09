@@ -1,5 +1,16 @@
 # Tiny Games – Devlog
 
+## Tiny Pet v0.6 - Growth & Neglect Timing Fix
+**Date:** August 9, 2026
+
+Found and fixed a couple of bugs where growth and neglect were tracking how many times the update loop happened to run instead of how much real time had actually passed. In practice that meant a pet aged fast with the tab open but barely aged at all while you were away, and neglect could either blow way past game over in a couple of minutes or barely register after a multi-day absence, depending on nothing more meaningful than whether the tab was open.
+
+#### Changes:
+- Pet growth now scales with real elapsed time (online or offline) instead of one age tick per loop, and stage thresholds were slowed down to a more deliberate pace
+- Neglect is now derived live from time since your last interaction instead of an ever-increasing score, so it scales correctly and no longer needs the tab open to behave
+- Coming back after a neglected stretch now eases the pet's mood back up gradually instead of either snapping back instantly or staying permanently stuck
+- Bumped the save version since the above changes what saved pet data means
+
 ## Colony Clicker v0.10 - Bug Fix & Cleanup
 **Date:** August 7, 2026
 

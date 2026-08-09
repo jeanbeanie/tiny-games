@@ -18,7 +18,7 @@ These stats change over time... even while you’re away. Check in, care for you
 - Designed to be tiny, cozy, low-pressure fun
 
 ## Version
-**v0.5**
+**v0.6**
 
 ## Future Plans
 - Change pet design

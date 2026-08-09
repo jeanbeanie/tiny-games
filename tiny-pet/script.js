@@ -1,7 +1,7 @@
-﻿// Tiny Pet v0.5
+﻿// Tiny Pet v0.6
 
 const TICK_INTERVAL = 5000; // update every 5 seconds while open
-const STORAGE_KEY = "tiny_pet_v0.5";
+const STORAGE_KEY = "tiny_pet_v0.6";
 const MAX_ELAPSED_MS = 1000 * 60 * 60 * 24; // 24 hours
 
 // pet.age accumulates in real minutes elapsed (online or offline), not tick count
