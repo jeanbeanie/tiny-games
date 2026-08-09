@@ -4,6 +4,10 @@ const TICK_INTERVAL = 5000; // update every 5 seconds while open
 const STORAGE_KEY = "tiny_pet_v0.5";
 const MAX_ELAPSED_MS = 1000 * 60 * 60 * 24; // 24 hours
 
+// pet.age accumulates in real minutes elapsed (online or offline), not tick count
+const CHILD_AGE_MINUTES = 180; // 3 hours
+const ADULT_AGE_MINUTES = 1440; // 24 hours
+
 const MOOD_CONFIG = {
     Neglected: {
         flavor: (name) => `${name} is in desperate need of care.`,
@@ -215,7 +219,7 @@ function applyTimeEffects(elapsedMs) {
     const minutes = elapsedMs / 60000; // 60000ms = 1 minute
 
     // pet ages
-    growPet();
+    growPet(minutes);
 
 	// Stats decrease over time
 	pet.stats.hunger -= minutes * DECAY_RATES.hunger;
@@ -259,14 +263,14 @@ function saveName() {
 }
 
 function getStageByAge(age) {
-    if (age < 50) return "egg";
-    if (age < 150) return "child";
+    if (age < CHILD_AGE_MINUTES) return "egg";
+    if (age < ADULT_AGE_MINUTES) return "child";
     return "adult";
 }
 
-function growPet() {
+function growPet(minutes) {
     const prevStage = pet.stage
-    pet.age += 1;
+    pet.age += minutes;
     pet.stage = getStageByAge(pet.age);
 
     if (prevStage !== pet.stage) {
