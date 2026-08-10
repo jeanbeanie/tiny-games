@@ -5,7 +5,8 @@
 // ======================
 
 const TICK_INTERVAL = 3000;
-const SAVE_KEY = "colonySave_v0.10";
+const SAVE_KEY = "colonySave";
+const SAVE_VERSION = 1; // bump only when createNewGameState()'s shape changes meaningfully
 
 //todo refactor costs and effects into data structures
 const COSTS = {
@@ -109,19 +110,65 @@ function createNewGameState() {
 }
 
 // Save and Load
+function isPlainObject(value) {
+    return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+// backfills missing fields from defaults, drops fields defaults no longer have
+// empty default objects (e.g. events.history) hold arbitrary keys, copied as is
+function mergeWithDefaults(defaults, saved) {
+    if (!isPlainObject(saved)) return defaults;
+
+    const defaultKeys = Object.keys(defaults);
+    if (defaultKeys.length === 0) return saved;
+
+    const result = { ...defaults };
+    for (const key of defaultKeys) {
+        if (!(key in saved)) continue;
+        const defaultValue = defaults[key];
+        const savedValue = saved[key];
+        result[key] = isPlainObject(defaultValue) && isPlainObject(savedValue)
+            ? mergeWithDefaults(defaultValue, savedValue)
+            : savedValue;
+    }
+    return result;
+}
+
+// add an entry when a save needs more than default backfill, like a renamed field
+// empty for now, schema version 1 has nothing to transform
+const migrations = {};
+
+function migrateSaveState(savedState, fromVersion) {
+    let state = savedState;
+    for (let v = fromVersion; v < SAVE_VERSION; v++) {
+        if (migrations[v]) state = migrations[v](state);
+    }
+    return mergeWithDefaults(createNewGameState(), state);
+}
+
 function saveGame() {
-    localStorage.setItem(SAVE_KEY, JSON.stringify(gameState));
+    localStorage.setItem(SAVE_KEY, JSON.stringify({
+        saveVersion: SAVE_VERSION,
+        state: gameState,
+    }));
 }
 
 function loadGame() {
-    // TODO add migration guards for future versions
-    const saved = localStorage.getItem(SAVE_KEY);
-    if (!saved) return;
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return;
+
+    let parsed;
     try {
-        gameState = JSON.parse(saved);
+        parsed = JSON.parse(raw);
     } catch {
         gameState = createNewGameState();
+        return;
     }
+
+    // versioned saves are wrapped, legacy saves are just the state
+    const savedVersion = typeof parsed.saveVersion === "number" ? parsed.saveVersion : 0;
+    const savedState = parsed.state || parsed;
+    gameState = migrateSaveState(savedState, savedVersion);
 }
 
 function scrollToTop() {
@@ -986,5 +1033,13 @@ updateUI();
 
 // Exposed for script.test.js; no-op in the browser (module is undefined there).
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { getTotalFoodConsumption, getFoodPerColonist, gameState };
+    module.exports = {
+        getTotalFoodConsumption,
+        getFoodPerColonist,
+        gameState,
+        createNewGameState,
+        mergeWithDefaults,
+        migrateSaveState,
+        SAVE_VERSION,
+    };
 }
