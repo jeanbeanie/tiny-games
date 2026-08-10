@@ -8,6 +8,9 @@ const TICK_INTERVAL = 3000;
 const SAVE_KEY = "colonySave";
 const SAVE_VERSION = 1; // bump only when createNewGameState()'s shape changes meaningfully
 
+// old keys from before saves had a version, checked once then cleared
+const LEGACY_SAVE_KEYS = ["colonySave_v0.10"];
+
 //todo refactor costs and effects into data structures
 const COSTS = {
     field: 10,
@@ -154,7 +157,19 @@ function saveGame() {
 }
 
 function loadGame() {
-    const raw = localStorage.getItem(SAVE_KEY);
+    let raw = localStorage.getItem(SAVE_KEY);
+
+    if (!raw) {
+        for (const legacyKey of LEGACY_SAVE_KEYS) {
+            const legacyRaw = localStorage.getItem(legacyKey);
+            if (legacyRaw) {
+                raw = legacyRaw;
+                localStorage.removeItem(legacyKey);
+                break;
+            }
+        }
+    }
+
     if (!raw) return;
 
     let parsed;
