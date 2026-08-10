@@ -41,25 +41,32 @@ const MOOD_CONFIG = {
     },
 };
 
-let pet = loadGame();
+let pet = getDefaultPetState();
 let lastMood = null;
 
 // UI Elements
-const petNameDisplay = document.getElementById("pet-name");
-const petNameInput = document.getElementById("pet-name-input");
-const faceDisplay = document.getElementById("pet-face");
-const bondLevelDisplay = document.getElementById("pet-bond-level");
-const petMoodDisplay = document.getElementById("pet-mood");
-const petFlavorTextDisplay = document.getElementById("pet-flavor-text");
-const petStageDisplay = document.getElementById("pet-stage");
-const hungerBar = document.getElementById("hunger-bar");
-const happinessBar = document.getElementById("happiness-bar");
-const energyBar = document.getElementById("energy-bar");
+// undefined outside a browser, so script.js can be required from a node test
+let petNameDisplay, petNameInput, faceDisplay, bondLevelDisplay, petMoodDisplay,
+    petFlavorTextDisplay, petStageDisplay, hungerBar, happinessBar, energyBar,
+    feedButton, playButton, sleepButton, resetPetLink;
 
-const feedButton = document.getElementById("feed-btn");
-const playButton = document.getElementById("play-btn");
-const sleepButton = document.getElementById("sleep-btn");
-const resetPetLink = document.getElementById("reset-pet-link");
+if (typeof document !== "undefined") {
+    petNameDisplay = document.getElementById("pet-name");
+    petNameInput = document.getElementById("pet-name-input");
+    faceDisplay = document.getElementById("pet-face");
+    bondLevelDisplay = document.getElementById("pet-bond-level");
+    petMoodDisplay = document.getElementById("pet-mood");
+    petFlavorTextDisplay = document.getElementById("pet-flavor-text");
+    petStageDisplay = document.getElementById("pet-stage");
+    hungerBar = document.getElementById("hunger-bar");
+    happinessBar = document.getElementById("happiness-bar");
+    energyBar = document.getElementById("energy-bar");
+
+    feedButton = document.getElementById("feed-btn");
+    playButton = document.getElementById("play-btn");
+    sleepButton = document.getElementById("sleep-btn");
+    resetPetLink = document.getElementById("reset-pet-link");
+}
 
 
 function resetPet() {
@@ -92,14 +99,14 @@ function tick() {
     }
 }
 function initGame() {
+    pet = loadGame();
+
 	// in case save file is corrupted
     if (!pet.lastUpdatedAt) {
         pet.lastUpdatedAt = Date.now();
     }
     tick();
 }
-
-setInterval(tick, TICK_INTERVAL);
 
 const returnFaceContent = () => {
     if (pet.stats.energy === 0) return "😵";
@@ -247,6 +254,8 @@ function applyTimeEffects(elapsedMs) {
 
 // Briefly show flavor text for actions
 function setTemporaryFlavor(text, duration = 2000) {
+    if (!petFlavorTextDisplay) return; // no op outside a browser
+
     petFlavorTextDisplay.textContent = text;
     setTimeout(() => {
         petFlavorTextDisplay.textContent = getPetFlavorText();
@@ -322,7 +331,9 @@ function triggerRandomEvent() {
     setTemporaryFlavor(event, 4000);
 }
 
-// button handlers
+// button handlers and game start, browser only
+if (typeof document !== "undefined") {
+
 resetPetLink.addEventListener("click", resetPet);
 
 petNameDisplay.addEventListener("click", () => {
@@ -378,4 +389,15 @@ sleepButton.addEventListener("click", () => {
     saveGame();
 });
 
+setInterval(tick, TICK_INTERVAL);
 initGame();
+
+} // end browser only guard
+
+// exposed for script.test.js, undefined in the browser
+if (typeof module !== "undefined" && module.exports) {
+    module.exports = {
+        pet, getDefaultPetState, getStageByAge, growPet,
+        getNeglectHours, getPetMood, applyTimeEffects, clampStats, handleInteraction,
+    };
+}
