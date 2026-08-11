@@ -63,8 +63,8 @@ let gameState = createNewGameState();
 function createNewGameState() {
     return {
         tick: 0,
-        statusMessage: null,
-        statusUntilTick: 0,
+        statusMessage: "Gather food and wood to get started. Try not to let anyone starve... no pressure.",
+        statusUntilTick: 10, // ~30 seconds at the 3s tick interval, then falls back to the real status
         land: {
             total: 1000,
             explored: 100,
@@ -198,6 +198,7 @@ function resetColony() {
     localStorage.removeItem(SAVE_KEY);
     eventBox.style.display = 'none';
     gameState = createNewGameState();
+    howToPlayDetails.open = true;
     saveGame();
     updateUI();
     setTimeout(scrollToTop, 0);
@@ -627,7 +628,7 @@ const events = [
 // these are declared here so every function in the file can see them,
 // even ones defined above this point, but only assigned in the browser
 // (skipped when script.js is `require`d from a Node test)
-let colonyStatus, eventBox, eventDescription, eventChoice1, eventChoice2,
+let colonyStatus, howToPlayDetails, eventBox, eventDescription, eventChoice1, eventChoice2,
     assignColonistsDiv, clickConstructionUI,
     foodDisplays, maxFoodDisplays, maxWoodDisplays, woodDisplays, populationDisplays, maxPopulationDisplays,
     exploredLandDisplay, totalLandDisplay,
@@ -642,6 +643,7 @@ let colonyStatus, eventBox, eventDescription, eventChoice1, eventChoice2,
 if (typeof document !== "undefined") {
 
 colonyStatus = document.getElementById('colony-status');
+howToPlayDetails = document.getElementById('how-to-play');
 eventBox = document.getElementById('event-box');
 eventDescription = document.getElementById('event-description');
 eventChoice1 = document.getElementById('event-choice-1'); // todo better naming
@@ -1053,6 +1055,10 @@ if (gameState.events.active) {
     }
 }
 setInterval(tick, TICK_INTERVAL);
+
+if (gameState.tick === 0) {
+    howToPlayDetails.open = true;
+}
 
 // Initial UI update
 updateUI();

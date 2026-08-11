@@ -25,6 +25,12 @@ button {
         border-color: #333333;
     }
 
+#how-to-play summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: #deb887;
+}
+
 .back-link {
     display: inline-block;
     margin-top: 1rem;
