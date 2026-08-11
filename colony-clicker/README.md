@@ -20,6 +20,7 @@ The latest update fixes a food consumption bug and cleans up some HTML/JS issues
 - Build structures to increase production and capacity
 - Keep food production ahead of population needs
 - Respond to random events carefully
+- Time pauses while you're away, so there's no pressure to check in constantly
 
 ## Roadmap (Short-Term)
 - Colonist slots for buildings and resources
