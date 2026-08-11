@@ -3,9 +3,9 @@
 A minimalist idle / incremental game about growing (and sometimes losing) a small colony over time.
 
 ## Current Version
-**v0.11**
+**v0.12**
 
-The latest update adds save migration and onboarding for first time players.
+The latest update makes fields require a colonist assigned to Food to produce.
 
 ## Core Features
 - Gather food and wood to keep your colony alive

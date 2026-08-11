@@ -1,5 +1,16 @@
 # Tiny Games – Devlog
 
+## Colony Clicker v0.12 - Fields Need Workers
+**Date:** August 11, 2026
+
+Fields used to produce food for free no matter what, pretty over powered if you ask me. Now they need a colonist assigned to Food to actually run, so building a bunch of fields without the people to staff them is no longer the meta. The first colonist now gets quietly put to work the moment your first field finishes, before colonist assignment even unlocks. "How convenient", the colonist grumbled.
+
+#### Changes:
+- Fields only produce food when staffed by a colonist assigned to Food, capped by whichever runs out first, fields or workers
+- Food workers staffing a field no longer also gather from the land at the same time, only leftover food workers do
+- The first field silently assigns your lone colonist to Food if you're still solo, so it isn't sitting idle before you can even assign anyone
+- Added a tooltip on the Build Field button explaining the staffing requirement
+
 ## Colony Clicker v0.11 - Save Migration & Onboarding
 **Date:** August 10, 2026
 
