@@ -1,5 +1,15 @@
 # Tiny Games – Devlog
 
+## Colony Clicker v0.11 - Save Migration & Onboarding
+**Date:** August 10, 2026
+
+Save migration has been on the list since v0.6, so it's good to finally get it in. Saves are no longer tied to the game's version number, and old saves get updated automatically instead of getting wiped out. Also added a short intro for new colonies so it's clearer what to do first.
+
+#### Changes:
+- Saves now upgrade automatically instead of resetting when the game updates
+- New colonies show a quick How to Play guide and a first step status tip
+- Fixed a bug where Abandon Colony and background ticking could break without warning
+
 ## Tiny Pet v0.6 - Growth & Neglect Timing Fix
 **Date:** August 9, 2026
 
