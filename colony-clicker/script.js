@@ -624,61 +624,74 @@ const events = [
 // UI + INPUT
 // ======================
 
-// Everything below touches the DOM, so it's skipped when script.js is
-// loaded in a non-browser environment (e.g. `require`d from a Node test).
+// these are declared here so every function in the file can see them,
+// even ones defined above this point, but only assigned in the browser
+// (skipped when script.js is `require`d from a Node test)
+let colonyStatus, eventBox, eventDescription, eventChoice1, eventChoice2,
+    assignColonistsDiv, clickConstructionUI,
+    foodDisplays, maxFoodDisplays, maxWoodDisplays, woodDisplays, populationDisplays, maxPopulationDisplays,
+    exploredLandDisplay, totalLandDisplay,
+    fieldsDisplay, housingDisplay, shedDisplay, granaryDisplay,
+    foodGainDisplay, foodLossDisplay, foodWorkersDisplay, woodWorkersDisplay, exploreWorkersDisplay,
+    buildWorkersDisplay, idleWorkersDisplay,
+    foodPlusBtn, foodMinusBtn, woodPlusBtn, woodMinusBtn, explorePlusBtn, exploreMinusBtn,
+    buildMinusBtn, buildPlusBtn,
+    clickConstructionBtn, constructionProgressDisplay, constructionTypeDisplay, constructionRequiredDisplay,
+    gatherFoodBtn, gatherWoodBtn, exploreLandBtn, buildFieldBtn, buildHouseBtn, buildShedBtn, buildGranaryBtn;
+
 if (typeof document !== "undefined") {
 
-const colonyStatus = document.getElementById('colony-status');
-const eventBox = document.getElementById('event-box');
-const eventDescription = document.getElementById('event-description');
-const eventChoice1 = document.getElementById('event-choice-1'); // todo better naming
-const eventChoice2 = document.getElementById('event-choice-2');
-const assignColonistsDiv = document.getElementById('assign-colonists-div');
-const clickConstructionUI = document.getElementById('click-construction-ui');
+colonyStatus = document.getElementById('colony-status');
+eventBox = document.getElementById('event-box');
+eventDescription = document.getElementById('event-description');
+eventChoice1 = document.getElementById('event-choice-1'); // todo better naming
+eventChoice2 = document.getElementById('event-choice-2');
+assignColonistsDiv = document.getElementById('assign-colonists-div');
+clickConstructionUI = document.getElementById('click-construction-ui');
 
-const foodDisplays = document.getElementsByClassName('food-gathered');
-const maxFoodDisplays = document.getElementsByClassName('max-food-count');
-const maxWoodDisplays = document.getElementsByClassName('max-wood-count');
-const woodDisplays = document.getElementsByClassName('wood-gathered');
-const populationDisplays = document.getElementsByClassName('population-count');
-const maxPopulationDisplays = document.getElementsByClassName('max-population-count');
-const exploredLandDisplay = document.getElementById('explored-land');
-const totalLandDisplay = document.getElementById('total-land');
+foodDisplays = document.getElementsByClassName('food-gathered');
+maxFoodDisplays = document.getElementsByClassName('max-food-count');
+maxWoodDisplays = document.getElementsByClassName('max-wood-count');
+woodDisplays = document.getElementsByClassName('wood-gathered');
+populationDisplays = document.getElementsByClassName('population-count');
+maxPopulationDisplays = document.getElementsByClassName('max-population-count');
+exploredLandDisplay = document.getElementById('explored-land');
+totalLandDisplay = document.getElementById('total-land');
 
-const fieldsDisplay = document.getElementById('fields-count');
-const housingDisplay = document.getElementById('housing-count');
-const shedDisplay = document.getElementById('shed-count');
-const granaryDisplay = document.getElementById('granary-count');
+fieldsDisplay = document.getElementById('fields-count');
+housingDisplay = document.getElementById('housing-count');
+shedDisplay = document.getElementById('shed-count');
+granaryDisplay = document.getElementById('granary-count');
 
-const foodGainDisplay = document.getElementById('food-gain-per-tick');
-const foodLossDisplay = document.getElementById('food-loss-per-tick');
-const foodWorkersDisplay = document.getElementById('food-workers');
-const woodWorkersDisplay = document.getElementById('wood-workers');
-const exploreWorkersDisplay = document.getElementById('explore-workers');
-const buildWorkersDisplay = document.getElementById('build-workers');
-const idleWorkersDisplay = document.getElementById('idle-workers');
+foodGainDisplay = document.getElementById('food-gain-per-tick');
+foodLossDisplay = document.getElementById('food-loss-per-tick');
+foodWorkersDisplay = document.getElementById('food-workers');
+woodWorkersDisplay = document.getElementById('wood-workers');
+exploreWorkersDisplay = document.getElementById('explore-workers');
+buildWorkersDisplay = document.getElementById('build-workers');
+idleWorkersDisplay = document.getElementById('idle-workers');
 
-const foodPlusBtn = document.getElementById('food-plus-btn');
-const foodMinusBtn = document.getElementById('food-minus-btn');
-const woodPlusBtn = document.getElementById('wood-plus-btn');
-const woodMinusBtn = document.getElementById('wood-minus-btn');
-const explorePlusBtn = document.getElementById('explore-plus-btn');
-const exploreMinusBtn = document.getElementById('explore-minus-btn');
-const buildMinusBtn = document.getElementById('build-minus-btn');
-const buildPlusBtn = document.getElementById('build-plus-btn');
+foodPlusBtn = document.getElementById('food-plus-btn');
+foodMinusBtn = document.getElementById('food-minus-btn');
+woodPlusBtn = document.getElementById('wood-plus-btn');
+woodMinusBtn = document.getElementById('wood-minus-btn');
+explorePlusBtn = document.getElementById('explore-plus-btn');
+exploreMinusBtn = document.getElementById('explore-minus-btn');
+buildMinusBtn = document.getElementById('build-minus-btn');
+buildPlusBtn = document.getElementById('build-plus-btn');
 
-const clickConstructionBtn = document.getElementById('click-construction-btn');
-const constructionProgressDisplay = document.getElementById('construction-progress');
-const constructionTypeDisplay = document.getElementById('construction-type');
-const constructionRequiredDisplay = document.getElementById('construction-required');
+clickConstructionBtn = document.getElementById('click-construction-btn');
+constructionProgressDisplay = document.getElementById('construction-progress');
+constructionTypeDisplay = document.getElementById('construction-type');
+constructionRequiredDisplay = document.getElementById('construction-required');
 
-const gatherFoodBtn = document.getElementById('gather-food-btn');
-const gatherWoodBtn = document.getElementById('gather-wood-btn');
-const exploreLandBtn = document.getElementById('explore-land-btn');
-const buildFieldBtn = document.getElementById('build-field-btn');
-const buildHouseBtn = document.getElementById('build-house-btn');
-const buildShedBtn = document.getElementById('build-shed-btn');
-const buildGranaryBtn = document.getElementById('build-granary-btn');
+gatherFoodBtn = document.getElementById('gather-food-btn');
+gatherWoodBtn = document.getElementById('gather-wood-btn');
+exploreLandBtn = document.getElementById('explore-land-btn');
+buildFieldBtn = document.getElementById('build-field-btn');
+buildHouseBtn = document.getElementById('build-house-btn');
+buildShedBtn = document.getElementById('build-shed-btn');
+buildGranaryBtn = document.getElementById('build-granary-btn');
 
 function showFeedbackTooltip(targetElement, text) {
     const tooltip= document.createElement("span");
