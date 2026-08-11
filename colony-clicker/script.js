@@ -18,6 +18,8 @@ const COSTS = {
     shed: 50,
 };
 
+const EXPLORE_WOOD_COST = 15;
+
 const EFFECTS = {
     foodPerField: 2,
     populationPerHouse: 2,
@@ -797,6 +799,9 @@ gatherWoodBtn.addEventListener('click', () => {
 
 exploreLandBtn.addEventListener('click', () => {
     if (gameState.land.unexplored <= 0) return;
+    if (gameState.resources.wood.count < EXPLORE_WOOD_COST) return;
+
+    gameState.resources.wood.count -= EXPLORE_WOOD_COST;
 
     // Future improvement: simulate biome diversity with different probabilities for food/wood/buildable land
     //  and maybe unique events / resources for each biome
@@ -1042,7 +1047,9 @@ function updateUI() {
     gatherWoodBtn.disabled = gameState.land.woodRemaining <= 0
         || gameState.resources.wood.count >= gameState.resources.wood.max
         ||  buttonCooldowns.gatherWood;
-    exploreLandBtn.disabled = buttonCooldowns.exploreLand ||  gameState.land.unexplored <= 0;
+    exploreLandBtn.disabled = buttonCooldowns.exploreLand
+        || gameState.land.unexplored <= 0
+        || gameState.resources.wood.count < EXPLORE_WOOD_COST;
     
     // check work on construction button cooldown
     clickConstructionBtn.disabled = buttonCooldowns.workOnConstruction;
