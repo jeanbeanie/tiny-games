@@ -334,6 +334,10 @@ function completeConstruction(project) {
     // todo refactor to use building data structure instead of hardcoding each type
     if (project.type === "field") {
         gameState.buildings.fields += 1;
+        // silently staff the field while solo, before colonist assignment even exists
+        if (!gameState.colonistAssignmentUnlocked && getIdleWorkers() > 0) {
+            gameState.workers.food += 1;
+        }
     }
     else if (project.type === "house") {
         gameState.buildings.houses += 1;
