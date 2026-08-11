@@ -66,9 +66,9 @@ function createNewGameState() {
         statusMessage: "Gather food and wood to get started. Try not to let anyone starve... no pressure.",
         statusUntilTick: 10, // ~30 seconds at the 3s tick interval, then falls back to the real status
         land: {
-            total: 1000,
-            explored: 100,
-            unexplored: 900,
+            total: 5000,
+            explored: 500,
+            unexplored: 4500,
 
             foodRemaining: 50,
             woodRemaining: 100,
