@@ -4,6 +4,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const {
     getTotalFoodConsumption,
+    getFieldWorkerCount,
     gameState,
     createNewGameState,
     mergeWithDefaults,
@@ -88,4 +89,28 @@ test("a pre migration save (no saveVersion) loads through migrateSaveState", () 
     const migrated = migrateSaveState(legacySave, 0);
 
     assert.equal(migrated.population.count, 5);
+});
+
+test("fields beyond the number of food workers don't count", () => {
+    gameState.buildings.fields = 5;
+    gameState.workers.food = 2;
+
+    assert.equal(getFieldWorkerCount(), 2);
+});
+
+test("food workers beyond the number of fields don't count", () => {
+    gameState.buildings.fields = 1;
+    gameState.workers.food = 3;
+
+    assert.equal(getFieldWorkerCount(), 1);
+});
+
+test("no fields or no food workers means zero staffed fields", () => {
+    gameState.buildings.fields = 0;
+    gameState.workers.food = 4;
+    assert.equal(getFieldWorkerCount(), 0);
+
+    gameState.buildings.fields = 4;
+    gameState.workers.food = 0;
+    assert.equal(getFieldWorkerCount(), 0);
 });

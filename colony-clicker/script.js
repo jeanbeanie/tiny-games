@@ -241,8 +241,14 @@ const getTotalFoodConsumption = () => {
     return Math.max(1, Math.ceil(gameState.population.count * getFoodPerColonist()));
 }
 
+// fields need a food worker to actually produce, capped by whichever runs out first
+function getFieldWorkerCount() {
+    return Math.min(gameState.buildings.fields, gameState.workers.food);
+}
+
 function advanceWorkerGathering() {
-    const foodWorkers = gameState.workers.food;
+    // food workers staffing a field don't also forage, only the leftover ones do
+    const foodWorkers = gameState.workers.food - getFieldWorkerCount();
     const woodWorkers = gameState.workers.wood;
 
     const foodGain = Math.min(
@@ -262,10 +268,8 @@ function advanceWorkerGathering() {
     gameState.land.woodRemaining -= woodGain;
 }
 function advanceEconomy() {
-    // Passively produce food
-    // TODO fields should either take food from discovered land, 
-    //or require a worker to upkeep instead of making food out of thin air
-    gameState.resources.food.count += gameState.buildings.fields * EFFECTS.foodPerField;
+    // fields need a food worker staffing them to produce
+    gameState.resources.food.count += getFieldWorkerCount() * EFFECTS.foodPerField;
 
     // Workers gather resources
     advanceWorkerGathering();
@@ -957,7 +961,8 @@ function updateUI() {
     housingDisplay.textContent = gameState.buildings.houses;
     shedDisplay.textContent = gameState.buildings.sheds;
     granaryDisplay.textContent = gameState.buildings.granaries;
-    foodGainDisplay.textContent = gameState.workers.food + (gameState.buildings.fields * EFFECTS.foodPerField);
+    const fieldWorkers = getFieldWorkerCount();
+    foodGainDisplay.textContent = (gameState.workers.food - fieldWorkers) + (fieldWorkers * EFFECTS.foodPerField);
     foodLossDisplay.textContent = getTotalFoodConsumption();
     foodWorkersDisplay.textContent = gameState.workers.food;
     woodWorkersDisplay.textContent = gameState.workers.wood;
@@ -1070,6 +1075,7 @@ if (typeof module !== "undefined" && module.exports) {
     module.exports = {
         getTotalFoodConsumption,
         getFoodPerColonist,
+        getFieldWorkerCount,
         gameState,
         createNewGameState,
         mergeWithDefaults,
