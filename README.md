@@ -14,20 +14,21 @@ These games are intentionally simple when first released, then added to and iter
 A minimalist idle game about managing a growing colony with limited resources.
 
 - Status: In active development
-- Focus: Systems design, events, survival mechanics, strategy
-- Current version: v0.9
+- Focus: Balancing growth against scarce resources and random setbacks
+- Current version: v0.11
 
 ### Tiny Pet
 A lightweight virtual pet / idle game inspired by Tamagotchi-style care mechanics.
 
 - Status: In active development
-- Focus: Time-based simulation
-- Current version: v0.5
+- Focus: Cozy, low pressure pet care
+- Current version: v0.6
 
 ## Tech
 - Plain HTML, CSS, and JavaScript
 - No frameworks
 - LocalStorage-based persistence
+- Basic automated tests (Node's built in test runner)
 
 ## Notes
 These games are works in progress and may change frequently. Feedback and curiosity are welcome!
