@@ -5,6 +5,7 @@ const assert = require("node:assert/strict");
 const {
     getTotalFoodConsumption,
     getFieldWorkerCount,
+    getExplorationYieldMultiplier,
     gameState,
     createNewGameState,
     mergeWithDefaults,
@@ -113,4 +114,30 @@ test("no fields or no food workers means zero staffed fields", () => {
     gameState.buildings.fields = 4;
     gameState.workers.food = 0;
     assert.equal(getFieldWorkerCount(), 0);
+});
+
+test("exploration yield is full strength when nothing is explored yet", () => {
+    gameState.land.total = 5000;
+    gameState.land.explored = 0;
+
+    assert.equal(getExplorationYieldMultiplier(), 1);
+});
+
+test("exploration yield shrinks as more of the map gets explored", () => {
+    gameState.land.total = 5000;
+
+    gameState.land.explored = 1000;
+    const early = getExplorationYieldMultiplier();
+
+    gameState.land.explored = 3000;
+    const later = getExplorationYieldMultiplier();
+
+    assert.ok(later < early);
+});
+
+test("exploration yield never drops below the floor", () => {
+    gameState.land.total = 5000;
+    gameState.land.explored = 4999;
+
+    assert.equal(getExplorationYieldMultiplier(), 0.15);
 });

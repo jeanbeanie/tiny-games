@@ -246,6 +246,13 @@ function getFieldWorkerCount() {
     return Math.min(gameState.buildings.fields, gameState.workers.food);
 }
 
+// exploration yield shrinks the more of the map is already explored
+// floored so late exploration always makes some progress
+function getExplorationYieldMultiplier() {
+    const exploredRatio = gameState.land.explored / gameState.land.total;
+    return Math.max(0.15, 1 - exploredRatio);
+}
+
 function advanceWorkerGathering() {
     // food workers staffing a field don't also forage, only the leftover ones do
     const foodWorkers = gameState.workers.food - getFieldWorkerCount();
@@ -285,7 +292,8 @@ function advanceExploration() {
     const explorers = gameState.workers.explore;
     if (explorers <= 0 || gameState.land.unexplored <= 0) return;
 
-    const rawDiscoverable = explorers * randomIntBetween(5, 10);
+    const baseDiscoverable = explorers * randomIntBetween(5, 10);
+    const rawDiscoverable = Math.max(1, Math.floor(baseDiscoverable * getExplorationYieldMultiplier()));
     // limit discoverable land to remaining unexplored land
     const discovered = Math.min(rawDiscoverable, gameState.land.unexplored);
 
@@ -793,11 +801,12 @@ exploreLandBtn.addEventListener('click', () => {
     // Future improvement: simulate biome diversity with different probabilities for food/wood/buildable land
     //  and maybe unique events / resources for each biome
     // Future: mini game for exploration
-    const unclampedDiscovered = randomIntBetween(30, 80);
+    const yieldMultiplier = getExplorationYieldMultiplier();
+    const unclampedDiscovered = Math.max(1, Math.floor(randomIntBetween(30, 80) * yieldMultiplier));
     const discovered = Math.min(unclampedDiscovered, gameState.land.unexplored);
-    const foodFound = randomIntBetween(10, 40);
-    const woodFound = randomIntBetween(20, 60);
-    const buildableFound = randomIntBetween(2, 4);
+    const foodFound = Math.max(1, Math.floor(randomIntBetween(10, 40) * yieldMultiplier));
+    const woodFound = Math.max(1, Math.floor(randomIntBetween(20, 60) * yieldMultiplier));
+    const buildableFound = Math.max(1, Math.floor(randomIntBetween(2, 4) * yieldMultiplier));
 
     gameState.land.explored += discovered;
     gameState.land.unexplored -= discovered;
@@ -1080,6 +1089,7 @@ if (typeof module !== "undefined" && module.exports) {
         getTotalFoodConsumption,
         getFoodPerColonist,
         getFieldWorkerCount,
+        getExplorationYieldMultiplier,
         gameState,
         createNewGameState,
         mergeWithDefaults,
