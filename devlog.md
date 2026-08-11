@@ -1,5 +1,15 @@
 # Tiny Games – Devlog
 
+## Colony Clicker v0.13 - Exploration Pacing
+**Date:** August 11, 2026
+
+Exploring was draining way too fast, taking away one of the main things pacing the game. The map is now much bigger, yields shrink the more you've already explored instead of staying flat, and manual exploring costs wood instead of being free.
+
+#### Changes:
+- Increased the total land pool 5x
+- Exploration yield now shrinks as more of the map gets explored, instead of a flat rate
+- Manual exploring now costs 15 wood per attempt
+
 ## Colony Clicker v0.12 - Fields Need Workers
 **Date:** August 11, 2026
 
