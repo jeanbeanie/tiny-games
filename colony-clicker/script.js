@@ -82,7 +82,7 @@ function createNewGameState() {
                 max: 100,
             },
             wood: {
-                count: 5,
+                count: 20,
                 max: 100,
             },
         },
@@ -759,7 +759,9 @@ clickConstructionBtn.addEventListener('click', () => {
         completeConstruction(project);
     }
 
-    disableButtonAfterClick("workOnConstruction", clickConstructionBtn, 3000);
+    // solo colonist isn't juggling other duties, so the cooldown is shorter
+    const constructionCooldown = gameState.colonistAssignmentUnlocked ? 3000 : 1500;
+    disableButtonAfterClick("workOnConstruction", clickConstructionBtn, constructionCooldown);
     saveGame();
     updateUI();
 });
