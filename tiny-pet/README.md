@@ -18,11 +18,10 @@ These stats change over time... even while you’re away. Check in, care for you
 - Designed to be tiny, cozy, low-pressure fun
 
 ## Version
-**v0.6**
+**v0.6.1**
 
 ## Future Plans
 - Change pet design
-- Neglect and care consequences
 - More interaction types (e.g., grooming, training)
 - Battle system against AI pets
 

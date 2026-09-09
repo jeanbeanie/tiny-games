@@ -1,4 +1,4 @@
-﻿// Tiny Pet v0.6
+﻿// Tiny Pet v0.6.1
 
 const TICK_INTERVAL = 5000; // update every 5 seconds while open
 const STORAGE_KEY = "tiny_pet_save";
