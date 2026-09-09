@@ -1,7 +1,8 @@
 ﻿// Tiny Pet v0.6
 
 const TICK_INTERVAL = 5000; // update every 5 seconds while open
-const STORAGE_KEY = "tiny_pet_v0.6";
+const STORAGE_KEY = "tiny_pet_save";
+const SAVE_VERSION = 1; // bump only when getDefaultPetState()'s shape changes meaningfully
 const MAX_ELAPSED_MS = 1000 * 60 * 60 * 24; // 24 hours
 
 // pet.age accumulates in real minutes elapsed (online or offline), not tick count
@@ -183,24 +184,25 @@ function updateUI() {
 
 // Save and load pet state
 function saveGame() {
-    try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(pet));
-    } catch {
-        // storage unavailable or full; skip saving for now
-    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        saveVersion: SAVE_VERSION,
+        state: pet,
+    }));
 }
 
 function loadGame() {
-    let saved;
-    try {
-        saved = localStorage.getItem(STORAGE_KEY);
-    } catch {
-        return getDefaultPetState();
-    }
-    if (!saved) return getDefaultPetState();
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return getDefaultPetState();
 
+    // catches malformed/null JSON
     try {
-        return JSON.parse(saved);
+        const { state } = JSON.parse(raw);
+        const defaults = getDefaultPetState();
+        return {
+            ...defaults,
+            ...state,
+            stats: { ...defaults.stats, ...state?.stats },
+        };
     } catch {
         return getDefaultPetState();
     }
