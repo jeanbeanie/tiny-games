@@ -1,5 +1,23 @@
 # Tiny Games – Devlog
 
+## Tiny Pet v0.6.1 - Save Key Decoupled from Version
+**Date:** September 9, 2026
+
+The save key had the game's version number in it, so bumping to v0.7 later would've pointed at an empty key and wiped every save instead of loading it. Fixed the same way Colony Clicker was in v0.11: saves now use a permanent key with their own separate version number.
+
+#### Changes:
+- Save data now lives under a permanent storage key instead of one tied to the game version
+- Added a saveVersion field to saved data so future schema changes can be migrated instead of wiping saves
+
+## Colony Clicker v0.13.1 - Faster Bootstrap
+**Date:** August 12, 2026
+
+The stretch before your second colonist shows up was taking too long. New colonies now start with enough wood to cover their first building, and construction goes a bit faster while you're still down to one colonist.
+
+#### Changes:
+- Starting wood increased from 5 to 20, enough to cover the first house or field outright
+- Work on Construction cooldown halved (3s → 1.5s) while you're still down to one colonist
+
 ## Colony Clicker v0.13 - Exploration Pacing
 **Date:** August 11, 2026
 
